@@ -39,9 +39,9 @@ public class DataInitializer {
             userRepository.saveAll(List.of(
                     new AppUser("aluno-1", "Jose Pedro Bitetti", "jose@apoflow.dev", Role.ALUNO),
                     new AppUser("orientador-1", "Prof. Gustavo Netto", "gustavo@apoflow.dev", Role.ORIENTADOR),
-                    new AppUser("comissao-1", "Profa. Gabriela Del Bianco", "gabriela@apoflow.dev", Role.COMISSAO),
+                    new AppUser("comissao-1", "Prof. Gabriel Labarca Del Bianco", "gabriel@apoflow.dev", Role.COMISSAO),
                     new AppUser("coordenacao-1", "Prof. Vitor Costa", "vitor@apoflow.dev", Role.COORDENACAO),
-                    new AppUser("secretaria-1", "Luiz Batista dos Santos", "luiz@apoflow.dev", Role.SECRETARIA)
+                    new AppUser("secretaria-1", "Dr. Luiz Batista dos Santos", "luiz@apoflow.dev", Role.SECRETARIA)
             ));
 
             studentRepository.saveAll(List.of(
