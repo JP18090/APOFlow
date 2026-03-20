@@ -69,16 +69,21 @@ export default function LoginPage() {
                 >
                   <Button
                     variant="ghost"
-                    className="h-auto w-full justify-start gap-3 px-4 py-3 hover:bg-secondary"
+                    className={
+                      `h-auto w-full justify-start gap-3 px-4 py-3 role-selectable` +
+                      (isAuthenticating ? ' opacity-60' : '')
+                    }
+                    onMouseEnter={e => e.currentTarget.classList.add('role-selected')}
+                    onMouseLeave={e => e.currentTarget.classList.remove('role-selected')}
                     onClick={() => void handleLogin(role.papel)}
                     disabled={isAuthenticating}
                   >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary text-primary">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-accent">
                       {role.icon}
                     </div>
                     <div className="text-left">
-                      <div className="font-display font-semibold text-foreground">{role.label}</div>
-                      <div className="font-body text-xs text-muted-foreground">{role.desc}</div>
+                      <div className="font-display font-semibold">{role.label}</div>
+                      <div className="font-body text-xs opacity-90">{role.desc}</div>
                     </div>
                   </Button>
                 </motion.div>

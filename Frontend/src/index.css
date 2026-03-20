@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
+    --background: 0 0% 100%;
     --foreground: 220 30% 12%;
 
     --card: 0 0% 100%;
@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 30% 12%;
 
-    --primary: 220 60% 30%;
+    --primary: 348 74% 47%; /* ab182d */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 20% 94%;
@@ -36,13 +36,13 @@
 
     --radius: 0.625rem;
 
-    --sidebar-background: 220 30% 15%;
-    --sidebar-foreground: 220 10% 85%;
-    --sidebar-primary: 348 74% 47%; /* ab182d */
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 25% 22%;
-    --sidebar-accent-foreground: 220 10% 90%;
-    --sidebar-border: 220 25% 22%;
+    --sidebar-background: 348 74% 47%; /* ab182d */
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 348 74% 47%; /* ab182d */
+    --sidebar-accent: 0 0% 100%;
+    --sidebar-accent-foreground: 348 74% 47%; /* ab182d */
+    --sidebar-border: 348 74% 47%; /* ab182d */
     --sidebar-ring: 348 74% 47%; /* ab182d */
 
     --success: 348 74% 47%; /* ab182d */
@@ -74,6 +74,36 @@
     background-image:
       radial-gradient(circle at top right, hsl(348 74% 47% / 0.08), transparent 22%),
       radial-gradient(circle at bottom left, hsl(220 60% 30% / 0.08), transparent 30%);
+    .selected-invert {
+      background: #fff !important;
+      color: hsl(348, 74%, 47%) !important;
+      border-radius: 0.75rem;
+      font-weight: 700;
+      box-shadow: 0 0 0 2px hsl(348, 74%, 47% / 0.10);
+      position: relative;
+      z-index: 1;
+    }
+
+    .navlink-sidebar {
+      color: #fff;
+      transition: background 0.2s, color 0.2s;
+      border-radius: 0.75rem;
+      font-weight: 500;
+    }
+    .navlink-sidebar:hover,
+    .navlink-sidebar:focus-visible {
+      background: #fff !important;
+      color: hsl(348, 74%, 47%) !important;
+    }
+
+    .role-selected {
+      background: hsl(348, 74%, 47%) !important;
+      color: #fff !important;
+      border-radius: 0.75rem;
+      box-shadow: 0 0 0 2px hsl(220, 30%, 12% / 0.10);
+      font-weight: 700;
+      border: 1.5px solid #fff;
+    }
   }
 
   h1,
