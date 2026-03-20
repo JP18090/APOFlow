@@ -24,7 +24,7 @@
     --muted: 220 15% 93%;
     --muted-foreground: 220 10% 45%;
 
-    --accent: 170 55% 40%;
+    --accent: 348 74% 47%; /* ab182d */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
@@ -38,14 +38,14 @@
 
     --sidebar-background: 220 30% 15%;
     --sidebar-foreground: 220 10% 85%;
-    --sidebar-primary: 170 55% 50%;
+    --sidebar-primary: 348 74% 47%; /* ab182d */
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 25% 22%;
     --sidebar-accent-foreground: 220 10% 90%;
     --sidebar-border: 220 25% 22%;
-    --sidebar-ring: 170 55% 50%;
+    --sidebar-ring: 348 74% 47%; /* ab182d */
 
-    --success: 152 55% 42%;
+    --success: 348 74% 47%; /* ab182d */
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
@@ -53,12 +53,12 @@
     --info-foreground: 0 0% 100%;
 
     --gradient-primary: linear-gradient(135deg, hsl(220, 60%, 30%), hsl(220, 55%, 45%));
-    --gradient-accent: linear-gradient(135deg, hsl(170, 55%, 40%), hsl(170, 50%, 55%));
+    --gradient-accent: linear-gradient(135deg, hsl(348, 74%, 47%), hsl(348, 74%, 47%)); /* ab182d */
     --gradient-hero: linear-gradient(135deg, hsl(220, 35%, 12%), hsl(220, 40%, 22%));
 
     --shadow-card: 0 1px 3px 0 hsl(220 30% 12% / 0.04), 0 1px 2px -1px hsl(220 30% 12% / 0.04);
     --shadow-elevated: 0 4px 16px -2px hsl(220 30% 12% / 0.08), 0 2px 6px -2px hsl(220 30% 12% / 0.04);
-    --shadow-glow: 0 0 20px hsl(170 55% 40% / 0.15);
+    --shadow-glow: 0 0 20px hsl(348 74% 47% / 0.15); /* ab182d */
 
     --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
     --font-body: 'Inter', system-ui, sans-serif;
@@ -72,7 +72,7 @@
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-body);
     background-image:
-      radial-gradient(circle at top right, hsl(170 55% 40% / 0.08), transparent 22%),
+      radial-gradient(circle at top right, hsl(348 74% 47% / 0.08), transparent 22%),
       radial-gradient(circle at bottom left, hsl(220 60% 30% / 0.08), transparent 30%);
   }
 
