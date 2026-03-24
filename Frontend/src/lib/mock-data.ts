@@ -4,11 +4,13 @@ export type BadgeTone = 'default' | 'destructive' | 'secondary' | 'outline';
 
 export type APOStatus =
   | 'rascunho'
+  | 'devolvida'
   | 'em_avaliacao_orientador'
   | 'em_avaliacao_comissao'
   | 'em_avaliacao_coordenacao'
   | 'aprovado'
   | 'reprovado'
+  | 'desistida'
   | 'arquivado'
   | 'lancado';
 
@@ -57,6 +59,29 @@ export const tiposAPO = [
   'Patente ou software',
 ];
 
+const pontosPorTipoNormalizado: Record<string, number> = {
+  'artigo em periodico': 4,
+  'artigo em congresso': 2,
+  'capitulo de livro': 5,
+  'estagio docencia': 3,
+  'minicurso ministrado': 2,
+  'participacao em comissao': 1,
+  'patente ou software': 6,
+};
+
+function normalizeTipoAtividade(tipo: string) {
+  return tipo
+    .normalize('NFD')
+    .replace(/[^\w\s]|_/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+export function getPontosByTipo(tipo: string) {
+  return pontosPorTipoNormalizado[normalizeTipoAtividade(tipo)] ?? null;
+}
+
 export interface NotificationItem {
   id: string;
   titulo: string;
@@ -71,11 +96,13 @@ export function getNotificationRecipient(role: Role) {
 export function getStatusLabel(status: APOStatus) {
   const labels: Record<APOStatus, string> = {
     rascunho: 'Rascunho',
-    em_avaliacao_orientador: 'Em avaliação do orientador',
+    devolvida: 'Devolvida para ajustes',
+    em_avaliacao_orientador: 'APO enviada',
     em_avaliacao_comissao: 'Em avaliação da comissão',
     em_avaliacao_coordenacao: 'Em avaliação da coordenação',
     aprovado: 'Aprovado',
     reprovado: 'Reprovado',
+    desistida: 'Desistida',
     arquivado: 'Arquivado',
     lancado: 'Lançado',
   };
@@ -84,7 +111,7 @@ export function getStatusLabel(status: APOStatus) {
 }
 
 export function getStatusVariant(status: APOStatus): BadgeTone {
-  if (status === 'reprovado') {
+  if (status === 'reprovado' || status === 'desistida') {
     return 'destructive';
   }
 

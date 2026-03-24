@@ -29,10 +29,10 @@ export const queryKeys = {
   notifications: (recipient: string) => ['notifications', recipient] as const,
 };
 
-export function login(role: Role) {
+export function login(email: string, senha: string) {
   return request<Usuario>('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ role }),
+    body: JSON.stringify({ email, senha }),
   });
 }
 
@@ -59,6 +59,40 @@ export function createApo(payload: {
   return request<APORecord>('/apos', {
     method: 'POST',
     body: JSON.stringify(payload),
+  });
+}
+
+export function saveApoDraft(payload: {
+  alunoId: string;
+  titulo: string;
+  tipo: string;
+  descricao: string;
+  pontos: number;
+  anexos: string[];
+}) {
+  return request<APORecord>('/apos/rascunho', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function resubmitApo(apoId: string, payload: {
+  alunoId: string;
+  titulo: string;
+  tipo: string;
+  descricao: string;
+  pontos: number;
+  anexos: string[];
+}) {
+  return request<APORecord>(`/apos/${apoId}/aluno/reenviar`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function giveUpApo(apoId: string) {
+  return request<APORecord>(`/apos/${apoId}/aluno/desistir`, {
+    method: 'POST',
   });
 }
 

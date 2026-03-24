@@ -1,33 +1,33 @@
 import { motion } from 'framer-motion';
-import { Archive, GraduationCap, Shield, UserCheck, Users } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { GraduationCap } from 'lucide-react';
+import { type FormEvent, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { MackenzieLogo } from '@/components/MackenzieLogo';
 import { useAuth } from '@/contexts/AuthContext';
-import { Role } from '@/lib/mock-data';
 import { toast } from 'sonner';
-
-const roles: { papel: Role; label: string; desc: string; icon: ReactNode }[] = [
-  { papel: 'aluno', label: 'Aluno', desc: 'Submeter e acompanhar APOs', icon: <GraduationCap className="h-6 w-6" /> },
-  { papel: 'orientador', label: 'Orientador', desc: 'Avaliar submissões dos orientados', icon: <UserCheck className="h-6 w-6" /> },
-  { papel: 'comissao', label: 'Comissão', desc: 'Votar e avaliar APOs', icon: <Users className="h-6 w-6" /> },
-  { papel: 'coordenacao', label: 'Coordenação', desc: 'Decisão final e assinaturas', icon: <Shield className="h-6 w-6" /> },
-  { papel: 'secretaria', label: 'Secretaria', desc: 'Arquivar e lançar no sistema', icon: <Archive className="h-6 w-6" /> },
-];
 
 export default function LoginPage() {
   const { login, isAuthenticating } = useAuth();
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
 
-  const handleLogin = async (role: Role) => {
+  const handleLogin = async (event: FormEvent) => {
+    event.preventDefault();
     try {
-      await login(role);
+      await login(email, senha);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Nao foi possivel autenticar.');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
+    <div className="relative min-h-screen bg-gradient-hero flex items-center justify-center p-4">
+      <div className="absolute right-4 top-4">
+        <MackenzieLogo className="h-12 w-auto max-w-[4.5rem]" />
+      </div>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -56,38 +56,27 @@ export default function LoginPage() {
 
         <Card className="border-0 shadow-elevated">
           <CardContent className="p-6">
-            <p className="mb-4 text-center font-body text-sm text-muted-foreground">
-              Selecione um papel para acessar o protótipo
-            </p>
-            <div className="space-y-2">
-              {roles.map((role, index) => (
-                <motion.div
-                  key={role.papel}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + index * 0.08 }}
-                >
-                  <Button
-                    variant="ghost"
-                    className={
-                      `h-auto w-full justify-start gap-3 px-4 py-3 role-selectable` +
-                      (isAuthenticating ? ' opacity-60' : '')
-                    }
-                    onMouseEnter={e => e.currentTarget.classList.add('role-selected')}
-                    onMouseLeave={e => e.currentTarget.classList.remove('role-selected')}
-                    onClick={() => void handleLogin(role.papel)}
-                    disabled={isAuthenticating}
-                  >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-accent">
-                      {role.icon}
-                    </div>
-                    <div className="text-left">
-                      <div className="font-display font-semibold">{role.label}</div>
-                      <div className="font-body text-xs opacity-90">{role.desc}</div>
-                    </div>
-                  </Button>
-                </motion.div>
-              ))}
+            <p className="mb-4 text-center font-body text-sm text-muted-foreground">Acesse com e-mail e senha</p>
+            <form className="space-y-3" onSubmit={handleLogin}>
+              <div className="space-y-1.5">
+                <Label className="font-display text-sm">E-mail</Label>
+                <Input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="usuario@mackenzie.com" required />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="font-display text-sm">Senha</Label>
+                <Input type="password" value={senha} onChange={(event) => setSenha(event.target.value)} required />
+              </div>
+              <Button type="submit" className="w-full bg-gradient-accent font-display font-semibold text-accent-foreground" disabled={isAuthenticating}>
+                Entrar
+              </Button>
+            </form>
+            <div className="mt-4 rounded-lg bg-secondary/60 p-3">
+              <p className="mb-1 text-xs font-display font-semibold text-foreground">Credenciais de demonstração</p>
+              <p className="text-xs text-muted-foreground">aluno@mackenzie.com / JosePedro</p>
+              <p className="text-xs text-muted-foreground">orientador@mackenzie.com / GustavoNeto</p>
+              <p className="text-xs text-muted-foreground">comissao@mackenzie.com / GabrielLabarca</p>
+              <p className="text-xs text-muted-foreground">coordenacao@mackenzie.com / VitorCosta</p>
+              <p className="text-xs text-muted-foreground">secretaria@mackenzie.com / LuizBatista</p>
             </div>
             {isAuthenticating && <p className="pt-2 text-center font-body text-xs text-muted-foreground">Conectando com a API...</p>}
           </CardContent>

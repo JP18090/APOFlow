@@ -2,7 +2,6 @@ package com.apoflow.backend.service;
 
 import com.apoflow.backend.api.dto.UserResponse;
 import com.apoflow.backend.domain.AppUser;
-import com.apoflow.backend.domain.Role;
 import com.apoflow.backend.repository.AppUserRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,10 +14,9 @@ public class AuthService {
         this.appUserRepository = appUserRepository;
     }
 
-    public UserResponse loginByRole(String roleValue) {
-        Role role = Role.valueOf(roleValue.trim().toUpperCase());
-        AppUser user = appUserRepository.findFirstByPapel(role)
-                .orElseThrow(() -> new IllegalArgumentException("Papel nao encontrado."));
+    public UserResponse loginByCredentials(String email, String senha) {
+        AppUser user = appUserRepository.findByEmailIgnoreCaseAndSenha(email.trim(), senha)
+                .orElseThrow(() -> new IllegalArgumentException("Credenciais invalidas."));
         return mapUser(user);
     }
 

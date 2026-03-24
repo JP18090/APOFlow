@@ -1,27 +1,53 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Upload, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
-import { createApo, queryKeys } from '@/lib/api';
-import { tiposAPO } from '@/lib/mock-data';
+import { createApo, getApos, queryKeys, resubmitApo, saveApoDraft } from '@/lib/api';
+import { getPontosByTipo, tiposAPO } from '@/lib/mock-data';
 import { toast } from 'sonner';
 
 export default function NovaAPO() {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { data: apos = [] } = useQuery({ queryKey: queryKeys.apos, queryFn: getApos, enabled: !!user });
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [pontos, setPontos] = useState('');
   const [files, setFiles] = useState<string[]>([]);
   const [tipo, setTipo] = useState('');
+  const [isLoadedFromEdit, setIsLoadedFromEdit] = useState(false);
+
+  const editingApoId = searchParams.get('editar');
+  const editingApo = useMemo(
+    () => apos.find((entry) => entry.id === editingApoId && entry.alunoId === user?.id),
+    [apos, editingApoId, user?.id],
+  );
+
+  useEffect(() => {
+    setIsLoadedFromEdit(false);
+  }, [editingApoId]);
+
+  useEffect(() => {
+    if (!editingApo || isLoadedFromEdit) {
+      return;
+    }
+
+    setTitulo(editingApo.titulo);
+    setDescricao(editingApo.descricao);
+    setPontos(String(editingApo.pontos));
+    setFiles(editingApo.anexos);
+    setTipo(editingApo.tipo);
+    setIsLoadedFromEdit(true);
+  }, [editingApo, isLoadedFromEdit]);
 
   const createMutation = useMutation({
     mutationFn: createApo,
@@ -32,10 +58,38 @@ export default function NovaAPO() {
         queryClient.invalidateQueries({ queryKey: queryKeys.notifications('orientador') }),
       ]);
       toast.success('APO submetida com sucesso!', { description: 'Seu orientador recebera uma notificacao.' });
-      navigate('/');
+      navigate('/minhas-apos');
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : 'Nao foi possivel submeter a APO.');
+    },
+  });
+
+  const saveDraftMutation = useMutation({
+    mutationFn: saveApoDraft,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apos });
+      toast.success('Rascunho salvo com sucesso.');
+      navigate('/minhas-apos');
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : 'Nao foi possivel salvar o rascunho.');
+    },
+  });
+
+  const resubmitMutation = useMutation({
+    mutationFn: ({ apoId, payload }: { apoId: string; payload: Parameters<typeof createApo>[0] }) => resubmitApo(apoId, payload),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.apos }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.notifications('aluno') }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.notifications('orientador') }),
+      ]);
+      toast.success('APO editada e reenviada com sucesso.');
+      navigate('/minhas-apos');
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : 'Nao foi possivel reenviar a APO.');
     },
   });
 
@@ -45,6 +99,22 @@ export default function NovaAPO() {
   };
 
   const removeFile = (index: number) => setFiles((previous) => previous.filter((_, current) => current !== index));
+
+  const handleTipoChange = (nextTipo: string) => {
+    setTipo(nextTipo);
+
+    const pontosSugeridos = getPontosByTipo(nextTipo);
+    setPontos(pontosSugeridos ? String(pontosSugeridos) : '');
+  };
+
+  const getPayload = () => ({
+    alunoId: user!.id,
+    titulo,
+    tipo,
+    descricao,
+    pontos: Number(pontos),
+    anexos: files,
+  });
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -59,21 +129,30 @@ export default function NovaAPO() {
       return;
     }
 
-    createMutation.mutate({
-      alunoId: user.id,
-      titulo,
-      tipo,
-      descricao,
-      pontos: Number(pontos),
-      anexos: files,
-    });
+    if (editingApoId) {
+      resubmitMutation.mutate({ apoId: editingApoId, payload: getPayload() });
+      return;
+    }
+
+    createMutation.mutate(getPayload());
+  };
+
+  const handleSaveDraft = () => {
+    if (!user) {
+      toast.error('Sessao invalida. Faça login novamente.');
+      return;
+    }
+
+    saveDraftMutation.mutate(getPayload());
   };
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-display font-bold text-foreground">Nova APO</h1>
-        <p className="font-body text-sm text-muted-foreground">Preencha os dados da atividade e anexe as evidências</p>
+        <h1 className="text-2xl font-display font-bold text-foreground">{editingApoId ? 'Editar APO devolvida' : 'Nova APO'}</h1>
+        <p className="font-body text-sm text-muted-foreground">
+          {editingApoId ? 'Ajuste os dados e reenvie para o orientador.' : 'Preencha os dados da atividade e anexe as evidências'}
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -92,7 +171,7 @@ export default function NovaAPO() {
                 <select
                   className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   value={tipo}
-                  onChange={(event) => setTipo(event.target.value)}
+                  onChange={(event) => handleTipoChange(event.target.value)}
                   required
                 >
                   <option value="" disabled>
@@ -107,7 +186,8 @@ export default function NovaAPO() {
               </div>
               <div className="space-y-1.5">
                 <Label className="font-display text-sm">Pontos</Label>
-                <Input type="number" min={1} max={6} placeholder="1-6" value={pontos} onChange={(event) => setPontos(event.target.value)} required />
+                <Input type="number" min={1} max={6} placeholder="Selecione o tipo" value={pontos} readOnly required />
+                <p className="text-xs text-muted-foreground">A pontuação é preenchida automaticamente conforme o tipo de atividade.</p>
               </div>
             </div>
             <div className="space-y-1.5">
@@ -138,11 +218,20 @@ export default function NovaAPO() {
         </Card>
 
         <div className="flex justify-end gap-3">
-          <Button type="button" variant="outline" onClick={() => navigate('/')}>
+          <Button type="button" variant="outline" onClick={() => navigate('/minhas-apos')}>
             Cancelar
           </Button>
-          <Button type="submit" className="bg-gradient-primary font-display font-semibold text-primary-foreground" disabled={createMutation.isPending}>
-            Submeter APO
+          {!editingApoId && (
+            <Button type="button" variant="outline" onClick={handleSaveDraft} disabled={saveDraftMutation.isPending || createMutation.isPending}>
+              Salvar como rascunho
+            </Button>
+          )}
+          <Button
+            type="submit"
+            className="bg-gradient-primary font-display font-semibold text-primary-foreground"
+            disabled={createMutation.isPending || resubmitMutation.isPending || saveDraftMutation.isPending}
+          >
+            {editingApoId ? 'Reenviar APO' : 'Submeter APO'}
           </Button>
         </div>
       </form>

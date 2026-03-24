@@ -9,7 +9,7 @@ import {
   ShieldCheck,
   Vote,
 } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { NavLink } from '@/components/NavLink';
 import { Button } from '@/components/ui/button';
 import {
@@ -73,14 +73,21 @@ const roleLabels: Record<Role, string> = {
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
-  const { user, logout } = useAuth();
+  const { user, logout, switchProfessorRole } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   if (!user) {
     return null;
   }
 
   const items = navByRole[user.papel];
+  const canSwitchProfessorRole = ['orientador', 'comissao', 'coordenacao'].includes(user.papel);
+
+  const changeRole = (nextRole: Role) => {
+    switchProfessorRole(nextRole);
+    navigate('/');
+  };
 
   return (
     <Sidebar collapsible="icon">
@@ -117,6 +124,20 @@ export function AppSidebar() {
             <p className="font-body text-xs text-sidebar-foreground/60">Logado como</p>
             <p className="truncate font-display text-sm font-semibold text-sidebar-foreground">{user.nome}</p>
             <p className="font-body text-xs text-sidebar-primary">{roleLabels[user.papel]}</p>
+            {canSwitchProfessorRole && (
+              <div className="mt-2 space-y-1">
+                <p className="font-body text-[11px] text-sidebar-foreground/60">Trocar perfil</p>
+                <select
+                  className="h-8 w-full rounded-md border border-sidebar-border bg-sidebar px-2 text-xs text-sidebar-foreground"
+                  value={user.papel}
+                  onChange={(event) => changeRole(event.target.value as Role)}
+                >
+                  <option value="orientador">Orientador</option>
+                  <option value="comissao">Comissão</option>
+                  <option value="coordenacao">Coordenação</option>
+                </select>
+              </div>
+            )}
           </div>
         )}
         <Button

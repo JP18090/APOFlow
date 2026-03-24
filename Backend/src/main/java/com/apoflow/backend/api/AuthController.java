@@ -21,6 +21,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public UserResponse login(@Valid @RequestBody LoginRequest request) {
-        return authService.loginByRole(request.role());
+        return authService.loginByCredentials(request.email(), request.senha());
     }
 }

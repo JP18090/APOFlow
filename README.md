@@ -4,62 +4,26 @@ Sistema web para gerenciar o fluxo de Atividades Programadas Obrigatorias do PPG
 
 ## Visao Geral
 
-O APOFlow foi pensado para reduzir o trabalho manual hoje distribuido entre aluno, orientador, comissao, coordenacao e secretaria. O repositorio agora esta dividido em frontend e backend, com comunicacao real via API REST.
+O APOFlow foi pensado para reduzir o trabalho manual hoje distribuido entre aluno, orientador, comissao, coordenacao e secretaria. O projeto foi organizado em duas camadas principais, frontend e backend, empacotadas em uma unica imagem Docker para simplificar a execucao.
 
 Fluxo coberto no prototipo:
 
 1. Aluno submete APO com descricao, pontos e anexos.
 2. Orientador avalia e pode aprovar ou devolver com justificativa.
-3. Comissao registra votos e consolida parecer.
-4. Coordenacao toma a decisao final e aciona a assinatura eletronica.
-5. Secretaria arquiva e realiza o lancamento quando o aluno atinge 12 pontos.
-
-## Objetivo
-
-Desenvolver uma aplicacao web que suporte o workflow de submissao e aprovacao das APOs do programa PPG-CA, permitindo:
-
-- cadastro de alunos e professores
-- submissao de atividades com evidencias
-- fluxo de avaliacao orientador -> comissao -> coordenacao
-- arquivamento e lancamento no sistema academico apenas apos 12 pontos
-- dashboards e alertas de pendencias e prazos
-
-## Membros do Grupo
-
-- Jose Pedro Bitetti
-- Gustavo Netto de Carvalho
-- Gabriel Labarca Del Bianco
-- Vitor Costa Lemos
-- Luiz Batista dos Santos
-- Rodrygo Rogerio Vasconcellos
-
-## Escopo
-
-Inclui:
-
-- interface web para aluno, orientador, comissao, coordenacao e secretaria
-- sistema de papeis e permissoes
-- upload e controle basico de documentos comprobatórios no prototipo
-- trilha do workflow com decisoes e justificativas
-- relatorios de creditos acumulados e pendencias
-- exportacao simulada para lancamento academico
-
-Fora do escopo na v1:
-
-- integracao completa com sistemas externos da universidade
-- OCR ou validacao automatica de documentos
+3. Aluno pode editar e reenviar APO devolvida, ou desistir.
+4. Comissao registra votos e consolida parecer.
+5. Coordenacao toma a decisao final.
+6. Secretaria arquiva e realiza o lancamento quando o aluno atinge 12 pontos.
 
 ## Funcionalidades Principais
 
-- autenticacao por papel para navegar pelo prototipo
+- autenticacao por e-mail e senha
 - dashboard especifico para cada ator do fluxo
-- formulario de submissao de APO
-- historico de APOs submetidas pelo aluno
+- formulario de submissao de APO com opcao de salvar rascunho
+- visualizacao de rascunhos e APOs enviadas pelo aluno
+- pontos por atividade na tela de APOs do aluno
 - notificacoes in-app simuladas
-- tela de avaliacao do orientador com justificativa
-- painel de votacao da comissao
-- decisao final pela coordenacao com consolidacao dos votos
-- fila de arquivamento e lancamento pela secretaria
+- troca de perfil para professor entre orientador, comissao e coordenacao
 
 ## Stack
 
@@ -67,88 +31,162 @@ Fora do escopo na v1:
 - Backend: Java 21, Spring Boot 3, Spring Web, Spring Data JPA, H2
 - Containerizacao: Docker multi-stage e docker-compose
 
-## Estrutura do Projeto
+## Arquitetura do Projeto
+
+### Organizacao por camadas
+
+- `Frontend/`: interface React responsável por login, dashboards, formulários e navegação por perfil.
+- `Backend/`: API REST Spring Boot responsável pelas regras de negócio, persistência em memória e carga inicial dos dados.
+- `Dockerfile`: build multi-stage que compila o frontend, empacota o backend e publica uma imagem final única.
+- `docker-compose.yml`: orquestra a execução da aplicação via Docker.
+
+### Estrutura principal
 
 ```text
 .
-├── Backend/
-│   ├── pom.xml
-│   └── src/
 ├── Frontend/
-│   ├── docs/
-│   │   └── use-cases.md
+│   ├── public/
 │   ├── src/
+│   │   ├── components/      # layout, sidebar, login, componentes de UI
+│   │   ├── contexts/        # autenticação e estado global simples
+│   │   ├── lib/             # cliente HTTP, tipos e utilitários
+│   │   └── pages/           # dashboards e telas por fluxo de negócio
 │   └── package.json
+├── Backend/
+│   ├── src/main/java/com/apoflow/backend/
+│   │   ├── api/             # controllers, handlers e DTOs
+│   │   ├── config/          # carga inicial e configuração
+│   │   ├── domain/          # entidades e enums do domínio APO
+│   │   ├── repository/      # acesso aos dados com Spring Data JPA
+│   │   └── service/         # regras de negócio do workflow
+│   └── pom.xml
 ├── Dockerfile
 ├── docker-compose.yml
 └── README.md
 ```
 
-## Como Executar Localmente
+### Arquitetura de execução
+
+1. O estágio `frontend-build` do Dockerfile instala dependências do Vite e gera o build estático do React.
+2. O estágio `backend-build` compila o Spring Boot e copia o conteúdo gerado do frontend para `src/main/resources/static`.
+3. A imagem final sobe apenas o `jar` do backend, que passa a servir tanto a API quanto os arquivos estáticos do frontend.
+4. O banco H2 roda em memória dentro da própria aplicação, com carga inicial feita no startup.
+
+### Fluxo de runtime
+
+- Navegador acessa `http://localhost:8080`
+- Spring Boot entrega a interface React já buildada
+- O frontend chama rotas REST em `/api/...`
+- O backend processa autenticação, APOs, notificações e workflow dos perfis
+- Os dados vivem em H2 em memória para fins de demonstração
+
+## Como Executar com Docker
 
 Requisitos:
 
-- Node.js 20 ou superior
-- npm 10 ou superior
-- Java 21
-- Maven 3.9+
+- Docker
+- Docker Compose
 
-### Backend
-
-```bash
-cd Backend
-mvn spring-boot:run
-```
-
-Servicos disponiveis:
-
-- API: `http://localhost:8080/api`
-- H2 Console: `http://localhost:8080/h2-console`
-
-### Frontend
-
-Instalacao e execucao:
-
-```bash
-cd Frontend
-npm install
-npm run dev
-```
-
-O Vite faz proxy de `/api` para `http://localhost:8080`.
-
-### Builds
-
-```bash
-cd Frontend && npm run build
-cd Backend && mvn test
-```
-
-## Executar com Docker
+### Subir a aplicação
 
 ```bash
 docker compose up --build
 ```
 
-Aplicacao disponibilizada em:
+Esse comando:
 
-- `http://localhost:8080`
+- constrói o frontend React
+- empacota o backend Spring Boot
+- gera a imagem final da aplicação
+- publica a aplicação em `http://localhost:8080`
 
-## Papeis Disponiveis no Prototipo
+### Executar em segundo plano
 
-Na tela inicial, o login e feito por selecao de papel para facilitar a navegacao durante a demonstracao.
+```bash
+docker compose up --build -d
+```
 
-- Aluno
-- Orientador
-- Comissao
-- Coordenacao
-- Secretaria
+### Parar a aplicação
 
-## Documento de Casos de Uso
+```bash
+docker compose down
+```
 
-Os casos de uso detalhados, incluindo diagramas PlantUML por ator e por processo, estao em:
+### Reconstruir após alterações
 
-- [Frontend/docs/use-cases.md](Frontend/docs/use-cases.md)
+```bash
+docker compose up --build
+```
+
+### Ver logs da aplicação
+
+```bash
+docker compose logs -f
+```
+
+### Remover containers, rede e artefatos do compose
+
+```bash
+docker compose down --volumes --remove-orphans
+```
+
+## Como Funciona o Dockerfile
+
+O arquivo [Dockerfile](/workspaces/APOFlow/Dockerfile) usa três estágios:
+
+- `frontend-build`: gera os arquivos estáticos do React
+- `backend-build`: compila o backend com Maven e incorpora o frontend buildado
+- `runtime`: sobe uma imagem enxuta com Java 21 JRE e o `jar` final
+
+Isso evita instalar Node e Maven na imagem final e reduz o tamanho do artefato de produção.
+
+## Publicação e Portas
+
+- Aplicação web: `http://localhost:8080`
+- API REST: `http://localhost:8080/api`
+- Console H2: não está exposto separadamente no Docker para uso externo no README, pois o foco é a aplicação integrada
+
+## Operação de Desenvolvimento com Docker
+
+Fluxo recomendado:
+
+```bash
+docker compose up --build
+```
+
+Após subir:
+
+- abra `http://localhost:8080`
+- faça login com um dos perfis disponíveis
+- teste os fluxos de submissão, devolução, comissão, coordenação e secretaria
+
+Quando alterar código e quiser refletir a mudança na imagem final, rode novamente:
+
+```bash
+docker compose up --build
+```
+
+## Acesso ao Prototipo
+
+Login por e-mail e senha:
+
+- `aluno@mackenzie.com` / `JosePedro`
+- `orientador@mackenzie.com` / `GustavoNeto`
+- `comissao@mackenzie.com` / `GabrielLabarca`
+- `coordenacao@mackenzie.com` / `VitorCosta`
+- `secretaria@mackenzie.com` / `LuizBatista`
+
+Obs.: o perfil de professor pode alternar entre orientador, comissao e coordenacao no menu lateral.
+
+## Casos de Uso Cobertos
+
+- aluno salva rascunho
+- aluno envia APO
+- orientador aprova ou devolve
+- aluno edita ou desiste após devolução
+- comissão registra votos
+- coordenação toma decisão final
+- secretaria arquiva e lança quando o total atinge 12 pontos
 
 ## Comunicacao da API
 
@@ -158,6 +196,9 @@ Principais rotas implementadas:
 - `GET /api/students`
 - `GET /api/apos`
 - `POST /api/apos`
+- `POST /api/apos/rascunho`
+- `PUT /api/apos/{id}/aluno/reenviar`
+- `POST /api/apos/{id}/aluno/desistir`
 - `POST /api/apos/{id}/orientador/aprovar`
 - `POST /api/apos/{id}/orientador/devolver`
 - `POST /api/apos/{id}/comissao/voto`
@@ -166,45 +207,6 @@ Principais rotas implementadas:
 - `POST /api/apos/{id}/secretaria/lancar`
 - `GET /api/notifications?recipient=aluno|orientador|comissao|coordenacao|secretaria`
 
-## Observacoes
+## Documento de Casos de Uso
 
-- O frontend agora consome dados reais do backend em vez de mocks locais.
-- O backend usa H2 em memoria com carga inicial para demonstracao.
-- O Dockerfile raiz gera uma imagem unica com frontend buildado e backend Spring Boot servindo a aplicacao.
-
-
-
-
-
-
-
-
-
-AlTERAÇÕES: Aluno: Após a devolução da APO ou edita ou desiste da APO
-Aluno: Opção de salvar como rascunho 
-Aluno: visualizar rascunhos 
-Aluno: Pontos das atividades correspondentes 
-Todos os perfils: deve visualizar PO enviada
-
-
-Professor pode trocar de perfil entre orientador, entre comissão, entre coordenação 
-
-Acesso por login: e-mail e senha 
-
-emial: aluno@mackenzie.com
-senha: JosePedro 
-
-emial: orientador@mackenzie.com
-senha: GustavoNeto
-
-Email: Comissão@mackenzie.com
-senha: GabrielLabarca
-
-emial: Coordenação@mackenzie.com
-senha: VitorCosta
-
-email Secretaria@mackenzie.com
-senha: LuizBatista
-
-
-lOGO DO MACKENZIE CANTO SUPERIOR DIREITO todas as paginas
+- [Frontend/docs/use-cases.md](Frontend/docs/use-cases.md)

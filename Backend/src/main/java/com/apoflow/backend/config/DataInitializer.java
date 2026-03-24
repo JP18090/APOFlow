@@ -37,11 +37,11 @@ public class DataInitializer {
             }
 
             userRepository.saveAll(List.of(
-                    new AppUser("aluno-1", "Jose Pedro Bitetti", "jose@apoflow.dev", Role.ALUNO),
-                    new AppUser("orientador-1", "Prof. Gustavo Netto", "gustavo@apoflow.dev", Role.ORIENTADOR),
-                    new AppUser("comissao-1", "Prof. Gabriel Labarca Del Bianco", "gabriel@apoflow.dev", Role.COMISSAO),
-                    new AppUser("coordenacao-1", "Prof. Vitor Costa", "vitor@apoflow.dev", Role.COORDENACAO),
-                    new AppUser("secretaria-1", "Dr. Luiz Batista dos Santos", "luiz@apoflow.dev", Role.SECRETARIA)
+                    new AppUser("aluno-1", "Jose Pedro Bitetti", "aluno@mackenzie.com", "JosePedro", Role.ALUNO),
+                    new AppUser("orientador-1", "Prof. Gustavo Netto", "orientador@mackenzie.com", "GustavoNeto", Role.ORIENTADOR),
+                    new AppUser("comissao-1", "Prof. Gabriel Labarca Del Bianco", "comissao@mackenzie.com", "GabrielLabarca", Role.COMISSAO),
+                    new AppUser("coordenacao-1", "Prof. Vitor Costa", "coordenacao@mackenzie.com", "VitorCosta", Role.COORDENACAO),
+                    new AppUser("secretaria-1", "Dr. Luiz Batista dos Santos", "secretaria@mackenzie.com", "LuizBatista", Role.SECRETARIA)
             ));
 
             studentRepository.saveAll(List.of(
@@ -65,7 +65,8 @@ public class DataInitializer {
                     apo("apo-5", "Minicurso em aprendizado de maquina", "Minicurso ministrado", "Minicurso ministrado durante escola de verao com lista de presenca.", 2, "aluno-2", "Rodrygo Rogerio Vasconcellos", "orientador-1", ApoStatus.ARQUIVADO, LocalDate.of(2026, 3, 8), List.of("minicurso.pdf", "lista-presenca.pdf"), List.of()),
                     apo("apo-6", "Registro de software para laboratorio", "Patente ou software", "Registro institucional do software com comprovante emitido pela universidade.", 6, "aluno-2", "Rodrygo Rogerio Vasconcellos", "orientador-1", ApoStatus.LANCADO, LocalDate.of(2026, 3, 1), List.of("registro.pdf"), List.of()),
                     apo("apo-7", "Rascunho de participacao em banca", "Participacao em comissao", "Rascunho salvo aguardando anexos finais.", 1, "aluno-1", "Jose Pedro Bitetti", "orientador-1", ApoStatus.RASCUNHO, LocalDate.of(2026, 3, 16), List.of(), List.of()),
-                    apo("apo-8", "Submissao com documentacao inconsistente", "Artigo em congresso", "Caso reprovado para alimentar a visualizacao historica do aluno.", 2, "aluno-1", "Jose Pedro Bitetti", "orientador-1", ApoStatus.REPROVADO, LocalDate.of(2026, 2, 22), List.of("submissao.pdf"), List.of())
+                    apo("apo-8", "Submissao com documentacao inconsistente", "Artigo em congresso", "Caso reprovado para alimentar a visualizacao historica do aluno.", 2, "aluno-1", "Jose Pedro Bitetti", "orientador-1", ApoStatus.REPROVADO, LocalDate.of(2026, 2, 22), List.of("submissao.pdf"), List.of()),
+                    apo("apo-9", "Atividade devolvida para ajuste", "Artigo em congresso", "APO devolvida pelo orientador para inclusao de comprovante adicional.", 2, "aluno-1", "Jose Pedro Bitetti", "orientador-1", ApoStatus.DEVOLVIDA, LocalDate.of(2026, 3, 20), List.of("versao-inicial.pdf"), List.of())
             ));
 
             notificationRepository.saveAll(List.of(

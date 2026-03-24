@@ -4,7 +4,8 @@ import { Role, Usuario } from '@/lib/mock-data';
 
 interface AuthContextValue {
   user: Usuario | null;
-  login: (role: Role) => Promise<void>;
+  login: (email: string, senha: string) => Promise<void>;
+  switchProfessorRole: (role: Role) => void;
   logout: () => void;
   isAuthenticating: boolean;
 }
@@ -42,19 +43,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
-      login: async (role) => {
+      login: async (email, senha) => {
         setIsAuthenticating(true);
         try {
-          const nextUser = await loginRequest(role);
+          const nextUser = await loginRequest(email, senha);
           setUser(nextUser);
         } finally {
           setIsAuthenticating(false);
         }
       },
+      switchProfessorRole: (role) => {
+        if (!user) {
+          return;
+        }
+
+        if (!['orientador', 'comissao', 'coordenacao'].includes(user.papel)) {
+          return;
+        }
+
+        if (!['orientador', 'comissao', 'coordenacao'].includes(role)) {
+          return;
+        }
+
+        setUser({
+          ...user,
+          papel: role,
+        });
+      },
       logout: () => setUser(null),
       isAuthenticating,
     }),
-    [isAuthenticating, user],
+    [isAuthenticating, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

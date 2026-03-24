@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,6 +35,21 @@ public class ApoController {
     @PostMapping
     public ApoResponse create(@Valid @RequestBody CreateApoRequest request) {
         return apoService.create(request);
+    }
+
+    @PostMapping("/rascunho")
+    public ApoResponse saveDraft(@Valid @RequestBody CreateApoRequest request) {
+        return apoService.saveDraft(request);
+    }
+
+    @PutMapping("/{apoId}/aluno/reenviar")
+    public ApoResponse resubmitByAluno(@PathVariable String apoId, @Valid @RequestBody CreateApoRequest request) {
+        return apoService.resubmitByAluno(apoId, request);
+    }
+
+    @PostMapping("/{apoId}/aluno/desistir")
+    public ApoResponse desistByAluno(@PathVariable String apoId) {
+        return apoService.giveUpByAluno(apoId);
     }
 
     @PostMapping("/{apoId}/orientador/aprovar")

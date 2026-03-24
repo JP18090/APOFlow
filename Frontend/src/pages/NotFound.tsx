@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { MackenzieLogo } from '@/components/MackenzieLogo';
 
 const NotFound = () => {
   const location = useLocation();
@@ -9,7 +10,10 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted px-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-muted px-4">
+      <div className="absolute right-4 top-4">
+        <MackenzieLogo className="h-12 w-auto max-w-[4.5rem]" />
+      </div>
       <div className="text-center">
         <h1 className="mb-4 text-4xl font-bold">404</h1>
         <p className="mb-4 text-xl text-muted-foreground">Página não encontrada</p>

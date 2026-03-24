@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface AppUserRepository extends JpaRepository<AppUser, String> {
     Optional<AppUser> findFirstByPapel(Role papel);
+    Optional<AppUser> findByEmailIgnoreCaseAndSenha(String email, String senha);
 }

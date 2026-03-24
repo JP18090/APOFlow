@@ -48,19 +48,18 @@ public class ApoService {
     public ApoResponse create(CreateApoRequest request) {
         Student student = studentService.getById(request.alunoId());
 
+        if (request.anexos().isEmpty()) {
+            throw new IllegalArgumentException("Adicione pelo menos um anexo para submeter a APO.");
+        }
+
         Apo apo = new Apo();
         apo.setId("apo-" + UUID.randomUUID().toString().substring(0, 8));
-        apo.setTitulo(request.titulo());
-        apo.setTipo(request.tipo());
-        apo.setDescricao(request.descricao());
-        apo.setPontos(request.pontos());
+        applyRequestData(apo, request);
         apo.setAlunoId(student.getId());
         apo.setAluno(student.getNome());
         apo.setOrientadorId(student.getOrientadorId());
         apo.setStatus(ApoStatus.EM_AVALIACAO_ORIENTADOR);
         apo.setDataAtualizacao(LocalDate.now());
-
-        request.anexos().forEach(name -> apo.getAnexos().add(new ApoAttachment(apo, name)));
 
         Apo saved = apoRepository.save(apo);
         notificationService.create(
@@ -71,6 +70,66 @@ public class ApoService {
                 "orientador"
         );
         return map(saved);
+    }
+
+    @Transactional
+    public ApoResponse saveDraft(CreateApoRequest request) {
+        Student student = studentService.getById(request.alunoId());
+
+        Apo apo = new Apo();
+        apo.setId("apo-" + UUID.randomUUID().toString().substring(0, 8));
+        applyRequestData(apo, request);
+        apo.setAlunoId(student.getId());
+        apo.setAluno(student.getNome());
+        apo.setOrientadorId(student.getOrientadorId());
+        apo.setStatus(ApoStatus.RASCUNHO);
+        apo.setDataAtualizacao(LocalDate.now());
+
+        return map(apoRepository.save(apo));
+    }
+
+    @Transactional
+    public ApoResponse resubmitByAluno(String apoId, CreateApoRequest request) {
+        if (request.anexos().isEmpty()) {
+            throw new IllegalArgumentException("Adicione pelo menos um anexo para reenviar a APO.");
+        }
+
+        Apo apo = getEntity(apoId);
+        if (apo.getStatus() != ApoStatus.DEVOLVIDA && apo.getStatus() != ApoStatus.RASCUNHO) {
+            throw new IllegalArgumentException("Apenas APO devolvida ou rascunho pode ser editada e reenviada.");
+        }
+
+        if (!apo.getAlunoId().equals(request.alunoId())) {
+            throw new IllegalArgumentException("Aluno invalido para esta APO.");
+        }
+
+        applyRequestData(apo, request);
+        apo.getVotos().clear();
+        apo.setStatus(ApoStatus.EM_AVALIACAO_ORIENTADOR);
+        apo.setDataAtualizacao(LocalDate.now());
+
+        notificationService.create(
+                id("noti"),
+                "APO reenviada por " + apo.getAluno() + " aguardando avaliacao do orientador",
+                "Agora mesmo",
+                false,
+                "orientador"
+        );
+
+        return map(apoRepository.save(apo));
+    }
+
+    @Transactional
+    public ApoResponse giveUpByAluno(String apoId) {
+        Apo apo = getEntity(apoId);
+        if (apo.getStatus() != ApoStatus.DEVOLVIDA && apo.getStatus() != ApoStatus.RASCUNHO) {
+            throw new IllegalArgumentException("Somente APO devolvida ou rascunho pode ser desistida.");
+        }
+
+        apo.setStatus(ApoStatus.DESISTIDA);
+        apo.setDataAtualizacao(LocalDate.now());
+        notificationService.create(id("noti"), "O aluno desistiu da APO \"" + apo.getTitulo() + "\"", "Agora mesmo", false, "orientador");
+        return map(apoRepository.save(apo));
     }
 
     @Transactional
@@ -85,7 +144,7 @@ public class ApoService {
     @Transactional
     public ApoResponse returnByOrientador(String apoId, DecisionRequest request) {
         Apo apo = getEntity(apoId);
-        apo.setStatus(ApoStatus.RASCUNHO);
+        apo.setStatus(ApoStatus.DEVOLVIDA);
         apo.setDataAtualizacao(LocalDate.now());
         notificationService.create(id("noti"), "Sua APO \"" + apo.getTitulo() + "\" foi devolvida pelo orientador: " + request.justificativa(), "Agora mesmo", false, "aluno");
         return map(apoRepository.save(apo));
@@ -172,5 +231,14 @@ public class ApoService {
 
     private String id(String prefix) {
         return prefix + "-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private void applyRequestData(Apo apo, CreateApoRequest request) {
+        apo.setTitulo(request.titulo());
+        apo.setTipo(request.tipo());
+        apo.setDescricao(request.descricao());
+        apo.setPontos(request.pontos());
+        apo.getAnexos().clear();
+        request.anexos().forEach(name -> apo.getAnexos().add(new ApoAttachment(apo, name)));
     }
 }

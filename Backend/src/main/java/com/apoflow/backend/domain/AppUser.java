@@ -20,6 +20,9 @@ public class AppUser {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
+    private String senha;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role papel;
@@ -27,10 +30,11 @@ public class AppUser {
     public AppUser() {
     }
 
-    public AppUser(String id, String nome, String email, Role papel) {
+    public AppUser(String id, String nome, String email, String senha, Role papel) {
         this.id = id;
         this.nome = nome;
         this.email = email;
+        this.senha = senha;
         this.papel = papel;
     }
 
@@ -56,6 +60,14 @@ public class AppUser {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getSenha() {
+        return senha;
+    }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
     }
 
     public Role getPapel() {

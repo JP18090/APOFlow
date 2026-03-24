@@ -3,7 +3,7 @@ package com.apoflow.backend.api.dto;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -13,6 +13,6 @@ public record CreateApoRequest(
         @NotBlank String tipo,
         @NotBlank String descricao,
         @Min(1) @Max(6) Integer pontos,
-        @NotEmpty List<String> anexos
+        @NotNull List<String> anexos
 ) {
 }
