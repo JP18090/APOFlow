@@ -172,3 +172,39 @@ Principais rotas implementadas:
 - O backend usa H2 em memoria com carga inicial para demonstracao.
 - O Dockerfile raiz gera uma imagem unica com frontend buildado e backend Spring Boot servindo a aplicacao.
 
+
+
+
+
+
+
+
+
+AlTERAÇÕES: Aluno: Após a devolução da APO ou edita ou desiste da APO
+Aluno: Opção de salvar como rascunho 
+Aluno: visualizar rascunhos 
+Aluno: Pontos das atividades correspondentes 
+Todos os perfils: deve visualizar PO enviada
+
+
+Professor pode trocar de perfil entre orientador, entre comissão, entre coordenação 
+
+Acesso por login: e-mail e senha 
+
+emial: aluno@mackenzie.com
+senha: JosePedro 
+
+emial: orientador@mackenzie.com
+senha: GustavoNeto
+
+Email: Comissão@mackenzie.com
+senha: GabrielLabarca
+
+emial: Coordenação@mackenzie.com
+senha: VitorCosta
+
+email Secretaria@mackenzie.com
+senha: LuizBatista
+
+
+lOGO DO MACKENZIE CANTO SUPERIOR DIREITO todas as paginas
