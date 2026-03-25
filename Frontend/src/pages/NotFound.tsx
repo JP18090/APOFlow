@@ -12,7 +12,7 @@ const NotFound = () => {
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-muted px-4">
       <div className="absolute right-4 top-4">
-        <MackenzieLogo className="h-12 w-auto max-w-[4.5rem]" />
+        <MackenzieLogo />
       </div>
       <div className="text-center">
         <h1 className="mb-4 text-4xl font-bold">404</h1>

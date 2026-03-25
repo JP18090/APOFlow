@@ -26,7 +26,7 @@ export default function LoginPage() {
   return (
     <div className="relative min-h-screen bg-gradient-hero flex items-center justify-center p-4">
       <div className="absolute right-4 top-4">
-        <MackenzieLogo className="h-12 w-auto max-w-[4.5rem]" />
+        <MackenzieLogo />
       </div>
       <motion.div
         initial={{ opacity: 0, y: 20 }}

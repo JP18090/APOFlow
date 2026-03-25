@@ -1,13 +1,9 @@
-export function MackenzieLogo({ className = 'h-10 w-auto max-w-[4rem]' }: { className?: string }) {
+export function MackenzieLogo() {
   return (
     <img
-      src="/mackenzie-logo.jpg"
+      src="/mackenzie-logo.png"
       alt="Logo Mackenzie"
-      className={`object-contain ${className}`}
-      onError={(event) => {
-        event.currentTarget.onerror = null;
-        event.currentTarget.src = '/mackenzie-logo.svg';
-      }}
+      className="object-contain h-20 w-auto max-w-[12rem]"
     />
   );
 }

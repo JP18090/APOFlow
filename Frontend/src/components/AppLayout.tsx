@@ -20,7 +20,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             <SidebarTrigger />
             <h2 className="text-sm font-display font-semibold text-foreground">Sistema APOFlow</h2>
             <div className="ml-auto">
-              <MackenzieLogo className="h-10 w-auto max-w-[4rem]" />
+              <MackenzieLogo />
             </div>
           </header>
           <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
