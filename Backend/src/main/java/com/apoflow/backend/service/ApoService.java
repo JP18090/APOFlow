@@ -153,9 +153,15 @@ public class ApoService {
     @Transactional
     public ApoResponse vote(String apoId, VoteRequest request) {
         Apo apo = getEntity(apoId);
+        String justificativa = request.justificativa() == null ? "" : request.justificativa().trim();
+        if (justificativa.isEmpty()) {
+            throw new IllegalArgumentException("Justificativa obrigatoria para voto da comissao.");
+        }
+
+        String membro = request.membro().trim();
         VoteDecision decision = VoteDecision.valueOf(request.decisao().trim().toUpperCase());
-        apo.getVotos().removeIf(existing -> existing.getMembro().equalsIgnoreCase(request.membro()));
-        apo.getVotos().add(new ApoVote(apo, request.membro(), decision, request.justificativa()));
+        apo.getVotos().removeIf(existing -> existing.getMembro().equalsIgnoreCase(membro));
+        apo.getVotos().add(new ApoVote(apo, membro, decision, justificativa));
         apo.setDataAtualizacao(LocalDate.now());
 
         if (decision == VoteDecision.DEVOLVER) {
