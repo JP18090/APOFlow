@@ -4,7 +4,7 @@ Sistema web para gerenciar o fluxo de Atividades Programadas Obrigatorias do PPG
 
 ## Visao Geral
 
-O APOFlow foi pensado para reduzir o trabalho manual hoje distribuido entre aluno, orientador, comissao, coordenacao e secretaria. O projeto foi organizado em duas camadas principais, frontend e backend, empacotadas em uma unica imagem Docker para simplificar a execucao.
+O APOFlow foi pensado para reduzir o trabalho manual hoje distribuido entre aluno, orientador, comissao, coordenacao e secretaria. O projeto e organizado em duas camadas principais, frontend e backend, empacotadas em containers Docker separados orquestrados pelo Docker Compose.
 
 Fluxo coberto no prototipo:
 
@@ -17,28 +17,33 @@ Fluxo coberto no prototipo:
 
 ## Funcionalidades Principais
 
-- autenticacao por e-mail e senha
+- autenticacao por e-mail e senha com verificacao em dois fatores via OTP (e-mail)
+- tokens JWT stateless com validade de 24 horas
 - dashboard especifico para cada ator do fluxo
 - formulario de submissao de APO com opcao de salvar rascunho
 - visualizacao de rascunhos e APOs enviadas pelo aluno
 - pontos por atividade na tela de APOs do aluno
-- notificacoes in-app simuladas
+- notificacoes in-app e por e-mail em cada transicao de status
 - troca de perfil para professor entre orientador, comissao e coordenacao
 
 ## Stack
 
 - Frontend: React 18, TypeScript, Vite, Tailwind CSS, React Router, TanStack Query, Framer Motion, Sonner
-- Backend: Java 21, Spring Boot 3, Spring Web, Spring Data JPA, H2
-- Containerizacao: Docker multi-stage e docker-compose
+- Backend: Java 21, Spring Boot 3, Spring Security, Spring Data MongoDB
+- Banco de dados: MongoDB 7.0
+- E-mail: MailerSend HTTP API
+- Containerizacao: Docker multi-stage e Docker Compose
+- Infraestrutura: AWS EC2 (t3.small) provisionada via Terraform
 
 ## Arquitetura do Projeto
 
 ### Organizacao por camadas
 
-- `Frontend/`: interface React responsável por login, dashboards, formulários e navegação por perfil.
-- `Backend/`: API REST Spring Boot responsável pelas regras de negócio, persistência em memória e carga inicial dos dados.
-- `Dockerfile`: build multi-stage que compila o frontend, empacota o backend e publica uma imagem final única.
-- `docker-compose.yml`: orquestra a execução da aplicação via Docker.
+- `Frontend/`: interface React responsavel por login com OTP, dashboards, formularios e navegacao por perfil.
+- `Backend/`: API REST Spring Boot responsavel pelas regras de negocio, persistencia no MongoDB, JWT e envio de e-mails.
+- `Dockerfile`: build multi-stage que compila o frontend, empacota o backend e publica uma imagem final unica.
+- `docker-compose.yml`: orquestra os containers da aplicacao (apoflow) e do banco (mongodb).
+- `terraform/`: infraestrutura AWS como codigo — VPC, EC2, Elastic IP e Security Groups.
 
 ### Estrutura principal
 
@@ -47,38 +52,56 @@ Fluxo coberto no prototipo:
 ├── Frontend/
 │   ├── public/
 │   ├── src/
-│   │   ├── components/      # layout, sidebar, login, componentes de UI
-│   │   ├── contexts/        # autenticação e estado global simples
+│   │   ├── components/      # layout, sidebar, login com OTP, componentes de UI
+│   │   ├── contexts/        # autenticacao JWT e estado global
 │   │   ├── lib/             # cliente HTTP, tipos e utilitários
-│   │   └── pages/           # dashboards e telas por fluxo de negócio
+│   │   └── pages/           # dashboards e telas por fluxo de negocio
 │   └── package.json
 ├── Backend/
 │   ├── src/main/java/com/apoflow/backend/
 │   │   ├── api/             # controllers, handlers e DTOs
-│   │   ├── config/          # carga inicial e configuração
-│   │   ├── domain/          # entidades e enums do domínio APO
-│   │   ├── repository/      # acesso aos dados com Spring Data JPA
-│   │   └── service/         # regras de negócio do workflow
+│   │   ├── config/          # SecurityConfig, DataInitializer
+│   │   ├── domain/          # entidades e enums do dominio APO
+│   │   ├── repository/      # acesso ao MongoDB com Spring Data
+│   │   └── service/         # regras de negocio, EmailService, NotificationService
 │   └── pom.xml
+├── terraform/               # infraestrutura AWS (VPC, EC2, EIP)
 ├── Dockerfile
 ├── docker-compose.yml
 └── README.md
 ```
 
-### Arquitetura de execução
+### Arquitetura de execucao
 
-1. O estágio `frontend-build` do Dockerfile instala dependências do Vite e gera o build estático do React.
-2. O estágio `backend-build` compila o Spring Boot e copia o conteúdo gerado do frontend para `src/main/resources/static`.
-3. A imagem final sobe apenas o `jar` do backend, que passa a servir tanto a API quanto os arquivos estáticos do frontend.
-4. O banco H2 roda em memória dentro da própria aplicação, com carga inicial feita no startup.
+1. O estagio `frontend-build` do Dockerfile instala dependencias do Vite e gera o build estatico do React.
+2. O estagio `backend-build` compila o Spring Boot e copia o conteudo gerado do frontend para `src/main/resources/static`.
+3. A imagem final sobe apenas o `jar` do backend, que serve tanto a API quanto os arquivos estaticos do frontend.
+4. O MongoDB roda em container separado com volume persistente.
 
 ### Fluxo de runtime
 
 - Navegador acessa `http://localhost:8080`
-- Spring Boot entrega a interface React já buildada
-- O frontend chama rotas REST em `/api/...`
-- O backend processa autenticação, APOs, notificações e workflow dos perfis
-- Os dados vivem em H2 em memória para fins de demonstração
+- Spring Boot entrega a interface React ja buildada
+- O frontend chama rotas REST em `/api/...` com token JWT no header `Authorization: Bearer`
+- O backend processa autenticacao (login, OTP, JWT), APOs, notificacoes e workflow dos perfis
+- Os dados sao persistidos no MongoDB
+
+## Variaveis de Ambiente
+
+| Variavel | Descricao | Padrao |
+|---|---|---|
+| `MONGODB_URI` | URI de conexao com o MongoDB | `mongodb://localhost:27017/apoflow` |
+| `JWT_SECRET` | Chave secreta para assinar tokens JWT (min. 32 chars) | valor de desenvolvimento |
+| `MAILERSEND_TOKEN` | Token de API do MailerSend para envio de e-mails | — |
+| `MAILERSEND_FROM` | Endereco de origem dos e-mails enviados | trial do MailerSend |
+| `EMAIL_ENABLED` | Habilita envio real de e-mails (`true`/`false`) | `false` |
+| `SEED_ALUNO_PASSWORD` | Senha do usuario aluno de demonstracao | — |
+| `SEED_ORIENTADOR_PASSWORD` | Senha do usuario orientador de demonstracao | — |
+| `SEED_COMISSAO_PASSWORD` | Senha do usuario comissao de demonstracao | — |
+| `SEED_COORDENACAO_PASSWORD` | Senha do usuario coordenacao de demonstracao | — |
+| `SEED_SECRETARIA_PASSWORD` | Senha do usuario secretaria de demonstracao | — |
+
+Crie um arquivo `.env` na raiz do projeto com essas variaveis antes de executar.
 
 ## Como Executar com Docker
 
@@ -87,7 +110,7 @@ Requisitos:
 - Docker
 - Docker Compose
 
-### Subir a aplicação
+### Subir a aplicacao
 
 ```bash
 docker compose up --build
@@ -95,10 +118,10 @@ docker compose up --build
 
 Esse comando:
 
-- constrói o frontend React
+- constroi o frontend React
 - empacota o backend Spring Boot
-- gera a imagem final da aplicação
-- publica a aplicação em `http://localhost:8080`
+- sobe o container MongoDB com volume persistente
+- publica a aplicacao em `http://localhost:8080`
 
 ### Executar em segundo plano
 
@@ -106,25 +129,25 @@ Esse comando:
 docker compose up --build -d
 ```
 
-### Parar a aplicação
+### Parar a aplicacao
 
 ```bash
 docker compose down
 ```
 
-### Reconstruir após alterações
+### Reconstruir apos alteracoes
 
 ```bash
 docker compose up --build
 ```
 
-### Ver logs da aplicação
+### Ver logs da aplicacao
 
 ```bash
 docker compose logs -f
 ```
 
-### Remover containers, rede e artefatos do compose
+### Remover containers, rede, volumes e artefatos
 
 ```bash
 docker compose down --volumes --remove-orphans
@@ -132,69 +155,74 @@ docker compose down --volumes --remove-orphans
 
 ## Como Funciona o Dockerfile
 
-O arquivo [Dockerfile](/workspaces/APOFlow/Dockerfile) usa três estágios:
+O arquivo [Dockerfile](Dockerfile) usa tres estagios:
 
-- `frontend-build`: gera os arquivos estáticos do React
+- `frontend-build`: gera os arquivos estaticos do React com Vite
 - `backend-build`: compila o backend com Maven e incorpora o frontend buildado
 - `runtime`: sobe uma imagem enxuta com Java 21 JRE e o `jar` final
 
-Isso evita instalar Node e Maven na imagem final e reduz o tamanho do artefato de produção.
+Isso evita instalar Node e Maven na imagem final e reduz o tamanho do artefato de producao.
 
-## Publicação e Portas
+## Publicacao e Portas
 
-- Aplicação web: `http://localhost:8080`
+- Aplicacao web: `http://localhost:8080`
 - API REST: `http://localhost:8080/api`
-- Console H2: não está exposto separadamente no Docker para uso externo no README, pois o foco é a aplicação integrada
+- MongoDB: porta `27017` (acessivel apenas entre containers)
 
-## Operação de Desenvolvimento com Docker
+## Deploy na AWS
 
-Fluxo recomendado:
+A infraestrutura e gerenciada por Terraform na pasta `terraform/`. Sao criados: VPC, subnet publica, Internet Gateway, Security Group (portas 22, 80, 443, 8080), Elastic IP e instancia EC2 Ubuntu 22.04 (t3.small).
+
+### Pre-requisitos
+
+- Terraform >= 1.8
+- AWS CLI configurado ou variaveis `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`
+- Par de chaves EC2 criado na AWS com o nome `apoflow-key`
+
+### Provisionar
 
 ```bash
-docker compose up --build
+cd terraform
+cp terraform.tfvars.example terraform.tfvars  # preencha os valores
+terraform init
+terraform apply
 ```
 
-Após subir:
+Apos o apply, a EC2 executa automaticamente o `user_data.sh`, que instala Docker, clona o repositorio e sobe o `docker compose`. A aplicacao estara disponivel em `http://<EC2_IP>:8080` apos cerca de 5 minutos.
 
-- abra `http://localhost:8080`
-- faça login com um dos perfis disponíveis
-- teste os fluxos de submissão, devolução, comissão, coordenação e secretaria
-
-Quando alterar código e quiser refletir a mudança na imagem final, rode novamente:
+### Destruir infraestrutura
 
 ```bash
-docker compose up --build
+terraform destroy
 ```
 
 ## Acesso ao Prototipo
 
-Login por e-mail e senha:
+Login em duas etapas:
 
-- Usuários de demonstração são criados sem senha hardcoded.
-- Defina senhas via variáveis de ambiente antes de iniciar o backend:
-- `SEED_ALUNO_PASSWORD`
-- `SEED_ORIENTADOR_PASSWORD`
-- `SEED_COMISSAO_PASSWORD`
-- `SEED_COORDENACAO_PASSWORD`
-- `SEED_SECRETARIA_PASSWORD`
+1. Informe e-mail e senha.
+2. Um codigo OTP de 6 digitos e enviado para o e-mail cadastrado. Informe o codigo para concluir o login.
 
-Obs.: o perfil de professor pode alternar entre orientador, comissao e coordenacao no menu lateral.
+Os usuarios de demonstracao sao criados no startup com as senhas definidas pelas variaveis de ambiente `SEED_*`.
+
+O perfil de professor pode alternar entre orientador, comissao e coordenacao no menu lateral.
 
 ## Casos de Uso Cobertos
 
 - aluno salva rascunho
 - aluno envia APO
 - orientador aprova ou devolve
-- aluno edita ou desiste após devolução
-- comissão registra votos
-- coordenação toma decisão final
-- secretaria arquiva e lança quando o total atinge 12 pontos
+- aluno edita ou desiste apos devolucao
+- comissao registra votos
+- coordenacao toma decisao final
+- secretaria arquiva e lanca quando o total atinge 12 pontos
 
 ## Comunicacao da API
 
 Principais rotas implementadas:
 
 - `POST /api/auth/login`
+- `POST /api/auth/verify-otp`
 - `GET /api/students`
 - `GET /api/apos`
 - `POST /api/apos`
