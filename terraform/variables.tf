@@ -23,6 +23,7 @@ variable "public_subnet_cidr" {
   default     = "10.0.1.0/24"
 }
 
+# Subnets privadas não são usadas (sem RDS), mas mantidas para compatibilidade
 variable "private_subnet_cidr" {
   description = "CIDR block para subnet privada (RDS)"
   type        = string
@@ -46,20 +47,6 @@ variable "ec2_key_pair_name" {
   description = "Nome da key pair para SSH"
   type        = string
   default     = "apoflow-key"
-}
-
-# RDS Variables
-variable "mongodb_username" {
-  description = "Usuário administrativo do MongoDB"
-  type        = string
-  sensitive   = true
-  default     = "apoflowadmin"
-}
-
-variable "mongodb_password" {
-  description = "Senha do MongoDB"
-  type        = string
-  sensitive   = true
 }
 
 variable "mailersend_token" {

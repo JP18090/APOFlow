@@ -19,50 +19,10 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-# IAM Role para EC2
-resource "aws_iam_role" "apoflow_ec2_role" {
-  name = "apoflow-ec2-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      }
-    ]
-  })
-}
-
-# IAM Policy para CloudWatch Logs
-resource "aws_iam_role_policy" "apoflow_ec2_cloudwatch_policy" {
-  name = "apoflow-ec2-cloudwatch-policy"
-  role = aws_iam_role.apoflow_ec2_role.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "logs:DescribeLogStreams"
-        ]
-        Resource = "arn:aws:logs:*:*:*"
-      }
-    ]
-  })
-}
-
-# IAM Instance Profile
-resource "aws_iam_instance_profile" "apoflow_ec2_profile" {
-  name = "apoflow-ec2-profile"
-  role = aws_iam_role.apoflow_ec2_role.name
+# AWS Academy (voclabs) não permite criar IAM roles.
+# Usa o LabInstanceProfile pré-existente no ambiente.
+data "aws_iam_instance_profile" "lab_profile" {
+  name = "LabInstanceProfile"
 }
 
 # EC2 Instance
@@ -71,7 +31,8 @@ resource "aws_instance" "apoflow_server" {
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.apoflow_public_subnet.id
   vpc_security_group_ids = [aws_security_group.apoflow_ec2_sg.id]
-  iam_instance_profile   = aws_iam_instance_profile.apoflow_ec2_profile.name
+  iam_instance_profile   = data.aws_iam_instance_profile.lab_profile.name
+  key_name               = var.ec2_key_pair_name
 
   user_data = templatefile("${path.module}/user_data.sh", {
     mailersend_token = var.mailersend_token
