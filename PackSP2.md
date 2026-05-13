@@ -337,13 +337,13 @@ O arquivo `docker-compose.yml` orquestra a execução da aplicação.
 
 ## 10. Credenciais de Acesso (Protótipo)
 
-| Perfil      | E-mail                      | Senha            |
-| ----------- | --------------------------- | ---------------- |
-| Aluno       | `aluno@mackenzie.com`       | `JosePedro`      |
-| Orientador  | `orientador@mackenzie.com`  | `GustavoNeto`    |
-| Comissão    | `comissao@mackenzie.com`    | `GabrielLabarca` |
-| Coordenação | `coordenacao@mackenzie.com` | `VitorCosta`     |
-| Secretaria  | `secretaria@mackenzie.com`  | `LuizBatista`    |
+| Perfil      | Email institucional (seed)      | Senha |
+|-------------|----------------------------------|-------|
+| Aluno       | `10427372@mackenzista.com.br`   | definida por `SEED_ALUNO_PASSWORD` |
+| Orientador  | `10437996@mackenzista.com.br`   | definida por `SEED_ORIENTADOR_PASSWORD` |
+| Comissão    | `10443681@mackenzista.com.br`   | definida por `SEED_COMISSAO_PASSWORD` |
+| Coordenação | `10438932@mackenzista.com.br`   | definida por `SEED_COORDENACAO_PASSWORD` |
+| Secretaria  | `10438938@mackenzista.com.br`   | definida por `SEED_SECRETARIA_PASSWORD` |
 
 ---
 

@@ -14,7 +14,9 @@ public class SpaForwardController {
         "/votacao",
         "/avaliacao-final",
         "/lancamento",
-        "/notificacoes"
+        "/notificacoes",
+        "/register",
+        "/change-password"
     })
     public String forward() {
         return "forward:/index.html";

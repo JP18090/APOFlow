@@ -16,7 +16,7 @@ RUN mvn -q -DskipTests dependency:go-offline
 COPY Backend/ ./
 RUN mkdir -p src/main/resources/static
 COPY --from=frontend-build /workspace/Frontend/dist/ src/main/resources/static/
-RUN mvn -q -DskipTests package
+RUN mvn -q -DskipTests clean package
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app

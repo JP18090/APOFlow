@@ -13,6 +13,8 @@ import AvaliacaoFinal from '@/pages/AvaliacaoFinal';
 import Lancamento from '@/pages/Lancamento';
 import NotificacoesRoute from '@/pages/NotificacoesRoute';
 import NotFound from '@/pages/NotFound';
+import ChangePasswordRoute from '@/pages/ChangePasswordRoute';
+import RegisterPage from '@/pages/RegisterPage';
 
 const queryClient = new QueryClient();
 
@@ -25,6 +27,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<DashboardRouter />} />
+            <Route path="/change-password" element={<ChangePasswordRoute />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route path="/nova-apo" element={<NovaAPORoute />} />
             <Route path="/minhas-apos" element={<MinhasAPOs />} />
             <Route path="/pendencias" element={<Pendencias />} />

@@ -1,61 +1,38 @@
 package com.apoflow.backend.domain;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
-import jakarta.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "apos")
+@Document(collection = "apos")
 public class Apo {
 
     @Id
     private String id;
 
-    @Column(nullable = false)
     private String titulo;
 
-    @Column(nullable = false)
     private String tipo;
 
-    @Column(nullable = false, length = 2000)
     private String descricao;
 
-    @Column(nullable = false)
     private Integer pontos;
 
-    @Column(nullable = false)
     private String alunoId;
 
-    @Column(nullable = false)
     private String aluno;
 
-    @Column(nullable = false)
     private String orientadorId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ApoStatus status;
 
-    @Column(nullable = false)
     private LocalDate dataAtualizacao;
 
-    @OneToMany(mappedBy = "apo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @OrderBy("id asc")
     private List<ApoAttachment> anexos = new ArrayList<>();
 
-    @OneToMany(mappedBy = "apo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @OrderBy("id asc")
     private List<ApoVote> votos = new ArrayList<>();
 
     public Apo() {

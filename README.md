@@ -170,11 +170,13 @@ docker compose up --build
 
 Login por e-mail e senha:
 
-- `aluno@mackenzie.com` / `JosePedro`
-- `orientador@mackenzie.com` / `GustavoNeto`
-- `comissao@mackenzie.com` / `GabrielLabarca`
-- `coordenacao@mackenzie.com` / `VitorCosta`
-- `secretaria@mackenzie.com` / `LuizBatista`
+- Usuários de demonstração são criados sem senha hardcoded.
+- Defina senhas via variáveis de ambiente antes de iniciar o backend:
+- `SEED_ALUNO_PASSWORD`
+- `SEED_ORIENTADOR_PASSWORD`
+- `SEED_COMISSAO_PASSWORD`
+- `SEED_COORDENACAO_PASSWORD`
+- `SEED_SECRETARIA_PASSWORD`
 
 Obs.: o perfil de professor pode alternar entre orientador, comissao e coordenacao no menu lateral.
 

@@ -2,11 +2,12 @@ package com.apoflow.backend.repository;
 
 import com.apoflow.backend.domain.AppUser;
 import com.apoflow.backend.domain.Role;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;
 
-public interface AppUserRepository extends JpaRepository<AppUser, String> {
+public interface AppUserRepository extends MongoRepository<AppUser, String> {
     Optional<AppUser> findFirstByPapel(Role papel);
-    Optional<AppUser> findByEmailIgnoreCaseAndSenha(String email, String senha);
+    Optional<AppUser> findByEmailIgnoreCase(String email);
+    Optional<AppUser> findByEmail(String email);
 }

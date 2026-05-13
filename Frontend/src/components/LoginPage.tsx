@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
-import { GraduationCap } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { GraduationCap, ShieldCheck } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,18 +8,30 @@ import { Label } from '@/components/ui/label';
 import { MackenzieLogo } from '@/components/MackenzieLogo';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
 export default function LoginPage() {
-  const { login, isAuthenticating } = useAuth();
+  const { login, verifyOtp, pendingOtpEmail, isAuthenticating } = useAuth();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [otpCode, setOtpCode] = useState('');
 
   const handleLogin = async (event: FormEvent) => {
     event.preventDefault();
     try {
       await login(email, senha);
+      toast.success('Código de verificação enviado para seu e-mail.');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Nao foi possivel autenticar.');
+      toast.error(error instanceof Error ? error.message : 'Não foi possível autenticar.');
+    }
+  };
+
+  const handleVerifyOtp = async (event: FormEvent) => {
+    event.preventDefault();
+    try {
+      await verifyOtp(otpCode);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Código inválido.');
     }
   };
 
@@ -54,33 +66,86 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <Card className="border-0 shadow-elevated">
-          <CardContent className="p-6">
-            <p className="mb-4 text-center font-body text-sm text-muted-foreground">Acesse com e-mail e senha</p>
-            <form className="space-y-3" onSubmit={handleLogin}>
-              <div className="space-y-1.5">
-                <Label className="font-display text-sm">E-mail</Label>
-                <Input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="usuario@mackenzie.com" required />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="font-display text-sm">Senha</Label>
-                <Input type="password" value={senha} onChange={(event) => setSenha(event.target.value)} required />
-              </div>
-              <Button type="submit" className="w-full bg-gradient-accent font-display font-semibold text-accent-foreground" disabled={isAuthenticating}>
-                Entrar
-              </Button>
-            </form>
-            <div className="mt-4 rounded-lg bg-secondary/60 p-3">
-              <p className="mb-1 text-xs font-display font-semibold text-foreground">Credenciais de demonstração</p>
-              <p className="text-xs text-muted-foreground">aluno@mackenzie.com / JosePedro</p>
-              <p className="text-xs text-muted-foreground">orientador@mackenzie.com / GustavoNeto</p>
-              <p className="text-xs text-muted-foreground">comissao@mackenzie.com / GabrielLabarca</p>
-              <p className="text-xs text-muted-foreground">coordenacao@mackenzie.com / VitorCosta</p>
-              <p className="text-xs text-muted-foreground">secretaria@mackenzie.com / LuizBatista</p>
-            </div>
-            {isAuthenticating && <p className="pt-2 text-center font-body text-xs text-muted-foreground">Conectando com a API...</p>}
-          </CardContent>
-        </Card>
+        <AnimatePresence mode="wait">
+          {pendingOtpEmail ? (
+            <motion.div key="otp" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
+              <Card className="border-0 shadow-elevated">
+                <CardContent className="p-6">
+                  <div className="mb-4 flex flex-col items-center gap-2">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-accent">
+                      <ShieldCheck className="h-5 w-5 text-accent-foreground" />
+                    </div>
+                    <p className="text-center font-display text-sm font-semibold text-foreground">Verificação em duas etapas</p>
+                    <p className="text-center font-body text-xs text-muted-foreground">
+                      Enviamos um código de 6 dígitos para<br />
+                      <span className="font-semibold text-foreground">{pendingOtpEmail}</span>
+                    </p>
+                  </div>
+                  <form className="space-y-3" onSubmit={handleVerifyOtp}>
+                    <div className="space-y-1.5">
+                      <Label className="font-display text-sm">Código de verificação</Label>
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]{6}"
+                        maxLength={6}
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                        placeholder="000000"
+                        className="text-center text-2xl tracking-widest"
+                        required
+                        autoFocus
+                      />
+                    </div>
+                    <Button type="submit" className="w-full bg-gradient-accent font-display font-semibold text-accent-foreground" disabled={isAuthenticating || otpCode.length !== 6}>
+                      {isAuthenticating ? 'Verificando...' : 'Confirmar'}
+                    </Button>
+                  </form>
+                  <p className="mt-3 text-center font-body text-xs text-muted-foreground">
+                    O código expira em 10 minutos.{' '}
+                    <button type="button" className="underline" onClick={() => login(email, senha)}>Reenviar</button>
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ) : (
+            <motion.div key="login" initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 30 }}>
+              <Card className="border-0 shadow-elevated">
+                <CardContent className="p-6">
+                  <p className="mb-4 text-center font-body text-sm text-muted-foreground">Acesse com e-mail e senha</p>
+                  <form className="space-y-3" onSubmit={handleLogin}>
+                    <div className="space-y-1.5">
+                      <Label className="font-display text-sm">E-mail</Label>
+                      <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="usuario@mackenzista.com.br" required />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="font-display text-sm">Senha</Label>
+                      <Input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required />
+                    </div>
+                    <Button type="submit" className="w-full bg-gradient-accent font-display font-semibold text-accent-foreground" disabled={isAuthenticating}>
+                      {isAuthenticating ? 'Verificando...' : 'Entrar'}
+                    </Button>
+                  </form>
+                  <div className="mt-4 rounded-lg bg-secondary/60 p-3">
+                    <p className="mb-1 text-xs font-display font-semibold text-foreground">Credenciais de demonstração</p>
+                    <p className="text-xs text-muted-foreground">10427372@mackenzista.com.br / JosePedro123@</p>
+                    <p className="text-xs text-muted-foreground">10437996@mackenzista.com.br / GustavoNeto123@</p>
+                    <p className="text-xs text-muted-foreground">10443681@mackenzista.com.br / GabrielLabarca123@</p>
+                    <p className="text-xs text-muted-foreground">10438932@mackenzista.com.br / VitorCosta123@</p>
+                    <p className="text-xs text-muted-foreground">10438938@mackenzista.com.br / LuizBatista123@</p>
+                  </div>
+                  {isAuthenticating && <p className="pt-2 text-center font-body text-xs text-muted-foreground">Conectando com a API...</p>}
+                  <p className="mt-4 text-center font-body text-sm text-muted-foreground">
+                    Novo usuário?{' '}
+                    <Link to="/register" className="font-semibold text-foreground underline underline-offset-2">
+                      Criar conta
+                    </Link>
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <p className="mt-6 text-center font-body text-xs text-primary-foreground/30">Protótipo v1 - Equipe APOFlow 2026</p>
       </motion.div>

@@ -1,10 +1,10 @@
 package com.apoflow.backend.repository;
 
 import com.apoflow.backend.domain.Apo;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 
-public interface ApoRepository extends JpaRepository<Apo, String> {
+public interface ApoRepository extends MongoRepository<Apo, String> {
     List<Apo> findByAlunoId(String alunoId);
 }

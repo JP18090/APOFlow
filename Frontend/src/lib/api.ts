@@ -1,11 +1,26 @@
 import { APORecord, AlunoResumo, NotificationItem, Role, Usuario } from '@/lib/mock-data';
 
 const API_BASE = '/api';
+const TOKEN_KEY = 'apoflow.jwt';
+
+export function getStoredToken(): string | null {
+  return typeof window !== 'undefined' ? window.localStorage.getItem(TOKEN_KEY) : null;
+}
+
+export function storeToken(token: string) {
+  window.localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearToken() {
+  window.localStorage.removeItem(TOKEN_KEY);
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = getStoredToken();
   const response = await fetch(`${API_BASE}${path}`, {
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init?.headers ?? {}),
     },
     ...init,
@@ -29,12 +44,60 @@ export const queryKeys = {
   notifications: (recipient: string) => ['notifications', recipient] as const,
 };
 
+export interface AuthResult {
+  token: string | null;
+  userId: string;
+  email: string;
+  nome: string;
+  papel: Role;
+  primeiroAcesso: boolean;
+  mensagem?: string | null;
+}
+
+export function register(nome: string, email: string, senha: string, papel: string) {
+  return request<AuthResult>('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({ nome, email, senha, papel }),
+  }).then((res) => { if (res.token) storeToken(res.token); return res; });
+}
+
 export function login(email: string, senha: string) {
-  return request<Usuario>('/auth/login', {
+  return request<AuthResult>('/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, senha }),
   });
+  // NOTE: login now only triggers OTP - token comes from verifyOtp
 }
+
+export function verifyOtp(email: string, code: string) {
+  return request<AuthResult>('/auth/verify-otp', {
+    method: 'POST',
+    body: JSON.stringify({ email, code }),
+  }).then((res) => { storeToken(res.token!); return res; });
+}
+
+export function changePassword(email: string, senhaAntiga: string, novaSenha: string) {
+  return request<{ message: string }>('/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify({ email, senhaAntiga, novaSenha }),
+  });
+}
+
+export function checkFirstAccess(email: string) {
+  return request<boolean>(`/auth/first-access/${encodeURIComponent(email)}`, {
+    method: 'GET',
+  });
+}
+
+export const api = {
+  post: <T>(path: string, data?: unknown) => request<T>(path, {
+    method: 'POST',
+    body: data ? JSON.stringify(data) : undefined,
+  }),
+  get: <T>(path: string) => request<T>(path, {
+    method: 'GET',
+  }),
+};
 
 export function getApos() {
   return request<APORecord[]>('/apos');

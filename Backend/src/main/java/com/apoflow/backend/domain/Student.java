@@ -1,24 +1,18 @@
 package com.apoflow.backend.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "students")
+@Document(collection = "students")
 public class Student {
 
     @Id
     private String id;
 
-    @Column(nullable = false)
     private String nome;
 
-    @Column(nullable = false)
     private String orientadorId;
 
-    @Column(nullable = false)
     private Integer pontosAcumulados;
 
     public Student() {

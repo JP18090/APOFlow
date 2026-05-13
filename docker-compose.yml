@@ -1,7 +1,24 @@
 services:
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
   apoflow:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    depends_on:
+      - mongodb
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/apoflow
+      - EMAIL_ENABLED=true
+      - MAILERSEND_TOKEN=${MAILERSEND_TOKEN}
+      - MAILERSEND_FROM=${MAILERSEND_FROM}
+
+volumes:
+  mongo_data:

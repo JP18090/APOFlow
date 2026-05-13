@@ -1,40 +1,58 @@
 package com.apoflow.backend.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "app_users")
+import java.time.LocalDateTime;
+
+@Document(collection = "users")
 public class AppUser {
 
     @Id
     private String id;
 
-    @Column(nullable = false)
     private String nome;
 
-    @Column(nullable = false, unique = true)
+    @Indexed(unique = true)
     private String email;
 
-    @Column(nullable = false)
-    private String senha;
+    private String senhaHash;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Role papel;
+
+    private boolean primeiroAcesso = true;
+
+    private boolean requerMudancaSenha = true;
+
+    private String googleId;
+
+    private String provedorOauth;
+
+    private LocalDateTime ultimaMudancaSenha;
+
+    private LocalDateTime ultimoLogin;
+
+    private boolean habilitado = true;
+
+    private boolean contaNaoExpirada = true;
+
+    private boolean contaNaoBloqueada = true;
+
+    private boolean credenciaisNaoExpiradas = true;
+
+    private LocalDateTime criadoEm;
+
+    private LocalDateTime atualizadoEm;
 
     public AppUser() {
     }
 
-    public AppUser(String id, String nome, String email, String senha, Role papel) {
+    public AppUser(String id, String nome, String email, String senhaHash, Role papel) {
         this.id = id;
         this.nome = nome;
         this.email = email;
-        this.senha = senha;
+        this.senhaHash = senhaHash;
         this.papel = papel;
     }
 
@@ -62,12 +80,22 @@ public class AppUser {
         this.email = email;
     }
 
-    public String getSenha() {
-        return senha;
+    public String getSenhaHash() {
+        return senhaHash;
     }
 
-    public void setSenha(String senha) {
-        this.senha = senha;
+    public void setSenhaHash(String senhaHash) {
+        this.senhaHash = senhaHash;
+    }
+
+    // Compatibilidade com partes legadas do código.
+    public String getSenha() {
+        return senhaHash;
+    }
+
+    // Compatibilidade com partes legadas do código.
+    public void setSenha(String senhaHash) {
+        this.senhaHash = senhaHash;
     }
 
     public Role getPapel() {
@@ -76,5 +104,101 @@ public class AppUser {
 
     public void setPapel(Role papel) {
         this.papel = papel;
+    }
+
+    public boolean isPrimeiroAcesso() {
+        return primeiroAcesso;
+    }
+
+    public void setPrimeiroAcesso(boolean primeiroAcesso) {
+        this.primeiroAcesso = primeiroAcesso;
+    }
+
+    public boolean isRequerMudancaSenha() {
+        return requerMudancaSenha;
+    }
+
+    public void setRequerMudancaSenha(boolean requerMudancaSenha) {
+        this.requerMudancaSenha = requerMudancaSenha;
+    }
+
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
+    }
+
+    public String getProvedorOauth() {
+        return provedorOauth;
+    }
+
+    public void setProvedorOauth(String provedorOauth) {
+        this.provedorOauth = provedorOauth;
+    }
+
+    public LocalDateTime getUltimaMudancaSenha() {
+        return ultimaMudancaSenha;
+    }
+
+    public void setUltimaMudancaSenha(LocalDateTime ultimaMudancaSenha) {
+        this.ultimaMudancaSenha = ultimaMudancaSenha;
+    }
+
+    public LocalDateTime getUltimoLogin() {
+        return ultimoLogin;
+    }
+
+    public void setUltimoLogin(LocalDateTime ultimoLogin) {
+        this.ultimoLogin = ultimoLogin;
+    }
+
+    public boolean isHabilitado() {
+        return habilitado;
+    }
+
+    public void setHabilitado(boolean habilitado) {
+        this.habilitado = habilitado;
+    }
+
+    public boolean isContaNaoExpirada() {
+        return contaNaoExpirada;
+    }
+
+    public void setContaNaoExpirada(boolean contaNaoExpirada) {
+        this.contaNaoExpirada = contaNaoExpirada;
+    }
+
+    public boolean isContaNaoBloqueada() {
+        return contaNaoBloqueada;
+    }
+
+    public void setContaNaoBloqueada(boolean contaNaoBloqueada) {
+        this.contaNaoBloqueada = contaNaoBloqueada;
+    }
+
+    public boolean isCredenciaisNaoExpiradas() {
+        return credenciaisNaoExpiradas;
+    }
+
+    public void setCredenciaisNaoExpiradas(boolean credenciaisNaoExpiradas) {
+        this.credenciaisNaoExpiradas = credenciaisNaoExpiradas;
+    }
+
+    public LocalDateTime getCriadoEm() {
+        return criadoEm;
+    }
+
+    public void setCriadoEm(LocalDateTime criadoEm) {
+        this.criadoEm = criadoEm;
+    }
+
+    public LocalDateTime getAtualizadoEm() {
+        return atualizadoEm;
+    }
+
+    public void setAtualizadoEm(LocalDateTime atualizadoEm) {
+        this.atualizadoEm = atualizadoEm;
     }
 }

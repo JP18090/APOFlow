@@ -19,6 +19,10 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.time.LocalDateTime;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 
 @Configuration
 @SuppressWarnings("null")
@@ -32,16 +36,94 @@ public class DataInitializer {
             AppNotificationRepository notificationRepository
     ) {
         return args -> {
+            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
             if (userRepository.count() > 0) {
                 return;
             }
 
+            // Create demo users with authentication fields
+            AppUser aluno = new AppUser();
+            aluno.setId("aluno-1");
+            aluno.setNome("Jose Pedro Bitetti");
+            aluno.setEmail("10427372@mackenzista.com.br");
+            aluno.setSenhaHash(passwordEncoder.encode(resolveSeedPassword("SEED_ALUNO_PASSWORD", "JosePedro123@")));
+            aluno.setPapel(Role.ALUNO);
+            aluno.setPrimeiroAcesso(true);
+            aluno.setRequerMudancaSenha(true);
+            aluno.setHabilitado(true);
+            aluno.setContaNaoExpirada(true);
+            aluno.setContaNaoBloqueada(true);
+            aluno.setCredenciaisNaoExpiradas(true);
+            aluno.setCriadoEm(LocalDateTime.now());
+            aluno.setAtualizadoEm(LocalDateTime.now());
+
+            AppUser orientador = new AppUser();
+            orientador.setId("orientador-1");
+            orientador.setNome("Gustavo Neto");
+            orientador.setEmail("10437996@mackenzista.com.br");
+            orientador.setSenhaHash(passwordEncoder.encode(resolveSeedPassword("SEED_ORIENTADOR_PASSWORD", "GustavoNeto123@")));
+            orientador.setPapel(Role.ORIENTADOR);
+            orientador.setPrimeiroAcesso(true);
+            orientador.setRequerMudancaSenha(true);
+            orientador.setHabilitado(true);
+            orientador.setContaNaoExpirada(true);
+            orientador.setContaNaoBloqueada(true);
+            orientador.setCredenciaisNaoExpiradas(true);
+            orientador.setCriadoEm(LocalDateTime.now());
+            orientador.setAtualizadoEm(LocalDateTime.now());
+
+            AppUser comissao = new AppUser();
+            comissao.setId("comissao-1");
+            comissao.setNome("Gabriel Labarca");
+            comissao.setEmail("10443681@mackenzista.com.br");
+            comissao.setSenhaHash(passwordEncoder.encode(resolveSeedPassword("SEED_COMISSAO_PASSWORD", "GabrielLabarca123@")));
+            comissao.setPapel(Role.COMISSAO);
+            comissao.setPrimeiroAcesso(true);
+            comissao.setRequerMudancaSenha(true);
+            comissao.setHabilitado(true);
+            comissao.setContaNaoExpirada(true);
+            comissao.setContaNaoBloqueada(true);
+            comissao.setCredenciaisNaoExpiradas(true);
+            comissao.setCriadoEm(LocalDateTime.now());
+            comissao.setAtualizadoEm(LocalDateTime.now());
+
+            AppUser coordenacao = new AppUser();
+            coordenacao.setId("coordenacao-1");
+            coordenacao.setNome("Vitor Costa");
+            coordenacao.setEmail("10438932@mackenzista.com.br");
+            coordenacao.setSenhaHash(passwordEncoder.encode(resolveSeedPassword("SEED_COORDENACAO_PASSWORD", "VitorCosta123@")));
+            coordenacao.setPapel(Role.COORDENACAO);
+            coordenacao.setPrimeiroAcesso(true);
+            coordenacao.setRequerMudancaSenha(true);
+            coordenacao.setHabilitado(true);
+            coordenacao.setContaNaoExpirada(true);
+            coordenacao.setContaNaoBloqueada(true);
+            coordenacao.setCredenciaisNaoExpiradas(true);
+            coordenacao.setCriadoEm(LocalDateTime.now());
+            coordenacao.setAtualizadoEm(LocalDateTime.now());
+
+            AppUser secretaria = new AppUser();
+            secretaria.setId("secretaria-1");
+            secretaria.setNome("Luiz Batista");
+            secretaria.setEmail("10438938@mackenzista.com.br");
+            secretaria.setSenhaHash(passwordEncoder.encode(resolveSeedPassword("SEED_SECRETARIA_PASSWORD", "LuizBatista123@")));
+            secretaria.setPapel(Role.SECRETARIA);
+            secretaria.setPrimeiroAcesso(true);
+            secretaria.setRequerMudancaSenha(true);
+            secretaria.setHabilitado(true);
+            secretaria.setContaNaoExpirada(true);
+            secretaria.setContaNaoBloqueada(true);
+            secretaria.setCredenciaisNaoExpiradas(true);
+            secretaria.setCriadoEm(LocalDateTime.now());
+            secretaria.setAtualizadoEm(LocalDateTime.now());
+
             userRepository.saveAll(List.of(
-                    new AppUser("aluno-1", "Jose Pedro Bitetti", "aluno@mackenzie.com", "JosePedro", Role.ALUNO),
-                    new AppUser("orientador-1", "Prof. Gustavo Netto", "orientador@mackenzie.com", "GustavoNeto", Role.ORIENTADOR),
-                    new AppUser("comissao-1", "Prof. Gabriel Labarca Del Bianco", "comissao@mackenzie.com", "GabrielLabarca", Role.COMISSAO),
-                    new AppUser("coordenacao-1", "Prof. Vitor Costa", "coordenacao@mackenzie.com", "VitorCosta", Role.COORDENACAO),
-                    new AppUser("secretaria-1", "Dr. Luiz Batista dos Santos", "secretaria@mackenzie.com", "LuizBatista", Role.SECRETARIA)
+                    aluno,
+                    orientador,
+                    comissao,
+                    coordenacao,
+                    secretaria
             ));
 
             studentRepository.saveAll(List.of(
@@ -93,15 +175,20 @@ public class DataInitializer {
         apo.setOrientadorId(orientadorId);
         apo.setStatus(status);
         apo.setDataAtualizacao(dataAtualizacao);
-        anexos.forEach(anexo -> apo.getAnexos().add(new ApoAttachment(apo, anexo)));
-        votos.forEach(voto -> {
-            voto.setApo(apo);
-            apo.getVotos().add(voto);
-        });
+        anexos.forEach(anexo -> apo.getAnexos().add(new ApoAttachment(anexo)));
+        votos.forEach(apo.getVotos()::add);
         return apo;
     }
 
     private static ApoVote vote(String membro, VoteDecision decisao, String justificativa) {
-        return new ApoVote(null, membro, decisao, justificativa);
+        return new ApoVote(membro, decisao, justificativa);
     }
+
+        private static String resolveSeedPassword(String envName, String defaultValue) {
+                String value = System.getenv(envName);
+                if (value != null && !value.isBlank()) {
+                        return value;
+                }
+                return defaultValue;
+        }
 }

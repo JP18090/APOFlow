@@ -1,0 +1,24 @@
+aws_region    = "us-east-1"
+environment   = "production"
+
+# VPC Configuration
+vpc_cidr               = "10.0.0.0/16"
+public_subnet_cidr     = "10.0.1.0/24"
+private_subnet_cidr    = "10.0.2.0/24"
+private_subnet_2_cidr  = "10.0.3.0/24"
+
+# EC2 Configuration
+instance_type       = "t3.small"
+ec2_key_pair_name   = "apoflow-key"
+
+# RDS Configuration
+db_allocated_storage    = 100
+db_max_allocated_storage = 200
+db_instance_class       = "db.t3.small"
+backup_retention_period = 7
+enable_multi_az         = false
+
+# MongoDB Credentials (IMPORTANTE: Use AWS Secrets Manager em produção!)
+mongodb_username = "apoflowadmin"
+# mongodb_password deve ser fornecido via linha de comando ou arquivo seguro:
+# terraform apply -var="mongodb_password=SenhaForteAqui123!"

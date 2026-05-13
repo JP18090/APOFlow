@@ -1,27 +1,20 @@
 package com.apoflow.backend.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "notifications")
+@Document(collection = "notifications")
 public class AppNotification {
 
     @Id
     private String id;
 
-    @Column(nullable = false)
     private String titulo;
 
-    @Column(nullable = false)
     private String tempo;
 
-    @Column(nullable = false)
     private boolean lida;
 
-    @Column(nullable = false)
     private String destinatario;
 
     public AppNotification() {

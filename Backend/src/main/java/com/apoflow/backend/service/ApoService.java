@@ -161,7 +161,7 @@ public class ApoService {
         String membro = request.membro().trim();
         VoteDecision decision = VoteDecision.valueOf(request.decisao().trim().toUpperCase());
         apo.getVotos().removeIf(existing -> existing.getMembro().equalsIgnoreCase(membro));
-        apo.getVotos().add(new ApoVote(apo, membro, decision, justificativa));
+        apo.getVotos().add(new ApoVote(membro, decision, justificativa));
         apo.setDataAtualizacao(LocalDate.now());
 
         if (decision == VoteDecision.DEVOLVER) {
@@ -245,6 +245,6 @@ public class ApoService {
         apo.setDescricao(request.descricao());
         apo.setPontos(request.pontos());
         apo.getAnexos().clear();
-        request.anexos().forEach(name -> apo.getAnexos().add(new ApoAttachment(apo, name)));
+        request.anexos().forEach(name -> apo.getAnexos().add(new ApoAttachment(name)));
     }
 }

@@ -2,6 +2,7 @@ package com.apoflow.backend.api;
 
 import com.apoflow.backend.api.dto.NotificationResponse;
 import com.apoflow.backend.service.NotificationService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +21,7 @@ public class NotificationController {
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public List<NotificationResponse> findAll(@RequestParam String recipient) {
         return notificationService.findByRecipient(recipient);
     }

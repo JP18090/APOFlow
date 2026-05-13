@@ -1,0 +1,23 @@
+[default]
+region=us-east-1
+output=json
+
+# Configurações opcionais:
+# [default]
+# region=us-east-1
+# output=json
+# s3=
+#     max_concurrent_requests=20
+#     max_bandwidth=100MB/s
+#     max_in_memory_upload_parts=10
+#     max_in_memory_download_parts=10
+#     multipart_threshold=8388608
+#     multipart_chunksize=8388608
+#     max_queue_size=1000
+#     strategy=standard
+# 
+# [profile production]
+# region=us-east-1
+# output=json
+# role_arn=arn:aws:iam::975050135864:role/apoflow-role
+# source_profile=default
