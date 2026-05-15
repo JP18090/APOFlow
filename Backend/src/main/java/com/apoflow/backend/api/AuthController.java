@@ -16,7 +16,9 @@ import com.apoflow.backend.api.dto.AuthResponse;
 import com.apoflow.backend.domain.Role;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.apoflow.backend.domain.Student;
 import com.apoflow.backend.repository.AppUserRepository;
+import com.apoflow.backend.repository.StudentRepository;
 import com.apoflow.backend.security.JwtTokenProvider;
 import com.apoflow.backend.domain.AppUser;
 import org.springframework.web.bind.annotation.*;
@@ -32,15 +34,17 @@ public class AuthController {
     private final AuthService authService;
     private final PasswordEncoder passwordEncoder;
     private final AppUserRepository userRepository;
+    private final StudentRepository studentRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final TwoFactorService twoFactorService;
 
     public AuthController(AuthService authService, PasswordEncoder passwordEncoder,
-                         AppUserRepository userRepository, JwtTokenProvider jwtTokenProvider,
-                         TwoFactorService twoFactorService) {
+                         AppUserRepository userRepository, StudentRepository studentRepository,
+                         JwtTokenProvider jwtTokenProvider, TwoFactorService twoFactorService) {
         this.authService = authService;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
+        this.studentRepository = studentRepository;
         this.jwtTokenProvider = jwtTokenProvider;
         this.twoFactorService = twoFactorService;
     }
@@ -77,6 +81,7 @@ public class AuthController {
         newUser.setEmail(registerRequest.email());
         newUser.setSenhaHash(passwordEncoder.encode(registerRequest.senha()));
         newUser.setPapel(papel);
+        newUser.setPapeis(java.util.List.of(papel));
         newUser.setPrimeiroAcesso(false);
         newUser.setRequerMudancaSenha(false);
         newUser.setHabilitado(true);
@@ -87,6 +92,10 @@ public class AuthController {
         newUser.setAtualizadoEm(LocalDateTime.now());
 
         userRepository.save(newUser);
+
+        if (papel == Role.ALUNO) {
+            studentRepository.save(new Student(newUser.getId(), newUser.getNome(), null, 0));
+        }
 
         String token = jwtTokenProvider.generateToken(registerRequest.email());
 

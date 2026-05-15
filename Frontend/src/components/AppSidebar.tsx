@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   LogOut,
   ShieldCheck,
+  User,
   Vote,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -39,26 +40,31 @@ const navByRole: Record<Role, NavItem[]> = {
     { title: 'Nova APO', url: '/nova-apo', icon: FilePlus },
     { title: 'Minhas APOs', url: '/minhas-apos', icon: ClipboardList },
     { title: 'Notificações', url: '/notificacoes', icon: Bell },
+    { title: 'Meu Perfil', url: '/perfil', icon: User },
   ],
   orientador: [
     { title: 'Painel', url: '/', icon: LayoutDashboard },
     { title: 'Pendências', url: '/pendencias', icon: ClipboardList },
     { title: 'Notificações', url: '/notificacoes', icon: Bell },
+    { title: 'Meu Perfil', url: '/perfil', icon: User },
   ],
   comissao: [
     { title: 'Painel', url: '/', icon: LayoutDashboard },
     { title: 'Itens p/ Votação', url: '/votacao', icon: Vote },
     { title: 'Notificações', url: '/notificacoes', icon: Bell },
+    { title: 'Meu Perfil', url: '/perfil', icon: User },
   ],
   coordenacao: [
     { title: 'Painel', url: '/', icon: LayoutDashboard },
     { title: 'Avaliação Final', url: '/avaliacao-final', icon: ShieldCheck },
     { title: 'Notificações', url: '/notificacoes', icon: Bell },
+    { title: 'Meu Perfil', url: '/perfil', icon: User },
   ],
   secretaria: [
     { title: 'Painel', url: '/', icon: LayoutDashboard },
     { title: 'Fila de Lançamento', url: '/lancamento', icon: Archive },
     { title: 'Notificações', url: '/notificacoes', icon: Bell },
+    { title: 'Meu Perfil', url: '/perfil', icon: User },
   ],
 };
 

@@ -15,6 +15,7 @@ import NotificacoesRoute from '@/pages/NotificacoesRoute';
 import NotFound from '@/pages/NotFound';
 import ChangePasswordRoute from '@/pages/ChangePasswordRoute';
 import RegisterPage from '@/pages/RegisterPage';
+import PerfilRoute from '@/pages/PerfilRoute';
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/avaliacao-final" element={<AvaliacaoFinal />} />
             <Route path="/lancamento" element={<Lancamento />} />
             <Route path="/notificacoes" element={<NotificacoesRoute />} />
+            <Route path="/perfil" element={<PerfilRoute />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

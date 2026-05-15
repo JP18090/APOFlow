@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ApoRepository extends MongoRepository<Apo, String> {
     List<Apo> findByAlunoId(String alunoId);
+    void deleteByAlunoId(String alunoId);
 }

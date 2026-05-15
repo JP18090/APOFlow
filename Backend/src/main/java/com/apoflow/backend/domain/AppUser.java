@@ -5,6 +5,8 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Document(collection = "users")
 public class AppUser {
@@ -20,6 +22,8 @@ public class AppUser {
     private String senhaHash;
 
     private Role papel;
+
+    private List<Role> papeis = new ArrayList<>();
 
     private boolean primeiroAcesso = true;
 
@@ -44,6 +48,14 @@ public class AppUser {
     private LocalDateTime criadoEm;
 
     private LocalDateTime atualizadoEm;
+
+    // Campos de perfil
+    private String ra;
+    private String fotoUrl;
+    private String curso;
+    private Integer semestre;
+    private String periodo; // MATUTINO, VESPERTINO, NOTURNO
+    private String drt;
 
     public AppUser() {
     }
@@ -105,6 +117,9 @@ public class AppUser {
     public void setPapel(Role papel) {
         this.papel = papel;
     }
+
+    public List<Role> getPapeis() { return papeis; }
+    public void setPapeis(List<Role> papeis) { this.papeis = papeis; }
 
     public boolean isPrimeiroAcesso() {
         return primeiroAcesso;
@@ -201,4 +216,22 @@ public class AppUser {
     public void setAtualizadoEm(LocalDateTime atualizadoEm) {
         this.atualizadoEm = atualizadoEm;
     }
+
+    public String getRa() { return ra; }
+    public void setRa(String ra) { this.ra = ra; }
+
+    public String getFotoUrl() { return fotoUrl; }
+    public void setFotoUrl(String fotoUrl) { this.fotoUrl = fotoUrl; }
+
+    public String getCurso() { return curso; }
+    public void setCurso(String curso) { this.curso = curso; }
+
+    public Integer getSemestre() { return semestre; }
+    public void setSemestre(Integer semestre) { this.semestre = semestre; }
+
+    public String getPeriodo() { return periodo; }
+    public void setPeriodo(String periodo) { this.periodo = periodo; }
+
+    public String getDrt() { return drt; }
+    public void setDrt(String drt) { this.drt = drt; }
 }

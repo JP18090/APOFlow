@@ -3,6 +3,7 @@ package com.apoflow.backend.api;
 import com.apoflow.backend.api.dto.ApoResponse;
 import com.apoflow.backend.api.dto.CreateApoRequest;
 import com.apoflow.backend.api.dto.DecisionRequest;
+import com.apoflow.backend.api.dto.SaveDraftRequest;
 import com.apoflow.backend.api.dto.VoteRequest;
 import com.apoflow.backend.service.ApoService;
 import jakarta.validation.Valid;
@@ -42,7 +43,7 @@ public class ApoController {
 
     @PostMapping("/rascunho")
     @PreAuthorize("hasRole('ALUNO')")
-    public ApoResponse saveDraft(@Valid @RequestBody CreateApoRequest request) {
+    public ApoResponse saveDraft(@Valid @RequestBody SaveDraftRequest request) {
         return apoService.saveDraft(request);
     }
 

@@ -7,7 +7,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import com.apoflow.backend.domain.AppUser;
+import com.apoflow.backend.domain.Role;
 import com.apoflow.backend.repository.AppUserRepository;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -30,9 +32,15 @@ public class AppUserDetailsService implements UserDetailsService {
         }
 
         AppUser appUser = user.get();
-        Collection<SimpleGrantedAuthority> authorities = List.of(
-            new SimpleGrantedAuthority("ROLE_" + appUser.getPapel().name())
-        );
+
+        List<Role> effectiveRoles = (appUser.getPapeis() != null && !appUser.getPapeis().isEmpty())
+                ? appUser.getPapeis()
+                : List.of(appUser.getPapel());
+
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        for (Role r : effectiveRoles) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + r.name()));
+        }
 
         return User.builder()
                 .username(appUser.getEmail())

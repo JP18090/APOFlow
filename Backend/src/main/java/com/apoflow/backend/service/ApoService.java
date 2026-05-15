@@ -4,6 +4,7 @@ import com.apoflow.backend.api.dto.ApoResponse;
 import com.apoflow.backend.api.dto.ApoVoteResponse;
 import com.apoflow.backend.api.dto.CreateApoRequest;
 import com.apoflow.backend.api.dto.DecisionRequest;
+import com.apoflow.backend.api.dto.SaveDraftRequest;
 import com.apoflow.backend.api.dto.VoteRequest;
 import com.apoflow.backend.domain.Apo;
 import com.apoflow.backend.domain.ApoAttachment;
@@ -73,12 +74,18 @@ public class ApoService {
     }
 
     @Transactional
-    public ApoResponse saveDraft(CreateApoRequest request) {
+    public ApoResponse saveDraft(SaveDraftRequest request) {
         Student student = studentService.getById(request.alunoId());
 
         Apo apo = new Apo();
         apo.setId("apo-" + UUID.randomUUID().toString().substring(0, 8));
-        applyRequestData(apo, request);
+        apo.setTitulo(request.titulo() != null ? request.titulo() : "");
+        apo.setTipo(request.tipo() != null ? request.tipo() : "");
+        apo.setDescricao(request.descricao() != null ? request.descricao() : "");
+        apo.setPontos(request.pontos() != null ? request.pontos() : 0);
+        if (request.anexos() != null) {
+            request.anexos().forEach(name -> apo.getAnexos().add(new ApoAttachment(name)));
+        }
         apo.setAlunoId(student.getId());
         apo.setAluno(student.getNome());
         apo.setOrientadorId(student.getOrientadorId());

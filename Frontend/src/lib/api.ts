@@ -26,6 +26,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
   });
 
+  if (response.status === 401) {
+    clearToken();
+    window.localStorage.removeItem('apoflow.current-user');
+    window.location.href = '/';
+    throw new Error('Sessão expirada. Faça login novamente.');
+  }
+
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => null)) as { message?: string } | null;
     throw new Error(errorBody?.message ?? 'Falha na comunicação com a API.');
@@ -156,6 +163,36 @@ export function resubmitApo(apoId: string, payload: {
 export function giveUpApo(apoId: string) {
   return request<APORecord>(`/apos/${apoId}/aluno/desistir`, {
     method: 'POST',
+  });
+}
+
+export interface UserProfile {
+  id: string;
+  nome: string;
+  email: string;
+  papel: string;
+  ra: string | null;
+  fotoUrl: string | null;
+  curso: string | null;
+  semestre: number | null;
+  periodo: string | null;
+  drt: string | null;
+}
+
+export function getProfile() {
+  return request<UserProfile>('/users/me');
+}
+
+export function updateProfile(payload: Partial<Omit<UserProfile, 'id' | 'email' | 'papel'>>) {
+  return request<UserProfile>('/users/me', {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteAccount() {
+  return request<{ message: string }>('/users/me', {
+    method: 'DELETE',
   });
 }
 
