@@ -57,6 +57,8 @@ public class EmailService {
                 System.out.printf("[EMAIL] Enviado para %s (status %d)%n", to, response.statusCode());
             } else {
                 System.err.printf("[EMAIL] Falha ao enviar para %s: HTTP %d — %s%n", to, response.statusCode(), response.body());
+                // Log full content so OTP codes can be retrieved from logs when email delivery fails
+                System.err.printf("[EMAIL] Conteudo nao entregue:%n%s%n----%n", body);
             }
         } catch (Exception e) {
             System.err.println("[EMAIL] Erro ao enviar para " + to + ": " + e.getMessage());
@@ -70,6 +72,18 @@ public class EmailService {
                 "Ele é válido por 10 minutos.%nSe você não solicitou este código, ignore este e-mail.%n%n" +
                 "— Equipe APOFlow / PPG-CA Mackenzie",
                 nome, otp);
+        send(to, subject, body);
+    }
+
+    public void sendPasswordReset(String to, String nome, String resetLink) {
+        String subject = "APOFlow \u2013 Redefinição de senha";
+        String body = String.format(
+                "Olá, %s!%n%nRecebemos uma solicitação para redefinir a senha da sua conta no APOFlow.%n%n"
+                + "Acesse o link abaixo para definir uma nova senha:%n%n    %s%n%n"
+                + "Este link é válido por 1 hora.%n"
+                + "Se você não solicitou esta redefinição, ignore este e-mail.%n%n"
+                + "— Equipe APOFlow / PPG-CA Mackenzie",
+                nome, resetLink);
         send(to, subject, body);
     }
 

@@ -16,6 +16,8 @@ import NotFound from '@/pages/NotFound';
 import ChangePasswordRoute from '@/pages/ChangePasswordRoute';
 import RegisterPage from '@/pages/RegisterPage';
 import PerfilRoute from '@/pages/PerfilRoute';
+import ForgotPasswordPage from '@/pages/ForgotPasswordPage';
+import ResetPasswordPage from '@/pages/ResetPasswordPage';
 
 const queryClient = new QueryClient();
 
@@ -38,6 +40,8 @@ const App = () => (
             <Route path="/lancamento" element={<Lancamento />} />
             <Route path="/notificacoes" element={<NotificacoesRoute />} />
             <Route path="/perfil" element={<PerfilRoute />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

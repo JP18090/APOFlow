@@ -79,6 +79,7 @@ export default function SecretariaDashboard() {
               <div key={aluno.id} className="flex flex-col gap-3 md:flex-row md:items-center">
                 {(() => {
                   const launchableApo = arquivados.find((entry) => entry.alunoId === aluno.id && entry.status === 'arquivado');
+                  const launchedApo = arquivados.find((entry) => entry.alunoId === aluno.id && entry.status === 'lancado');
 
                   return (
                     <>
@@ -87,7 +88,13 @@ export default function SecretariaDashboard() {
                   <p className="font-body text-xs text-muted-foreground">{aluno.pontosAcumulados}/12 pontos</p>
                 </div>
                 <div className="w-full md:w-32">
-                  <Progress value={(aluno.pontosAcumulados / 12) * 100} className="h-2" />
+                  {launchedApo ? (
+                    <div className="text-right text-sm font-display font-semibold text-success">
+                      Lançado
+                    </div>
+                  ) : (
+                    <Progress value={(aluno.pontosAcumulados / 12) * 100} className="h-2" />
+                  )}
                 </div>
                 {launchableApo && aluno.pontosAcumulados >= 12 && (
                   <Button size="sm" className="bg-gradient-accent font-display text-xs text-accent-foreground" onClick={() => launchMutation.mutate(launchableApo.id)} disabled={launchMutation.isPending}>

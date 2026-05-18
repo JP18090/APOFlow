@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [otpCode, setOtpCode] = useState('');
+  const [showDemoCredentials, setShowDemoCredentials] = useState(false);
 
   const handleLogin = async (event: FormEvent) => {
     event.preventDefault();
@@ -53,9 +54,14 @@ export default function LoginPage() {
             transition={{ delay: 0.2, type: 'spring' }}
             className="mb-4 inline-flex items-center gap-3"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-accent shadow-glow">
+            <button
+              type="button"
+              onClick={() => setShowDemoCredentials((current) => !current)}
+              className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-accent shadow-glow transition-transform hover:scale-105"
+              aria-label="Mostrar credenciais de demonstração"
+            >
               <GraduationCap className="h-7 w-7 text-accent-foreground" />
-            </div>
+            </button>
             <h1 className="text-3xl font-display font-bold text-primary-foreground">APOFlow</h1>
           </motion.div>
           <p className="font-body text-sm text-primary-foreground/60">
@@ -126,19 +132,26 @@ export default function LoginPage() {
                       {isAuthenticating ? 'Verificando...' : 'Entrar'}
                     </Button>
                   </form>
-                  <div className="mt-4 rounded-lg bg-secondary/60 p-3">
-                    <p className="mb-1 text-xs font-display font-semibold text-foreground">Credenciais de demonstração</p>
-                    <p className="text-xs text-muted-foreground">10427372@mackenzista.com.br / JosePedro123@</p>
-                    <p className="text-xs text-muted-foreground">10437996@mackenzista.com.br / GustavoNeto123@</p>
-                    <p className="text-xs text-muted-foreground">10443681@mackenzista.com.br / GabrielLabarca123@</p>
-                    <p className="text-xs text-muted-foreground">10438932@mackenzista.com.br / VitorCosta123@</p>
-                    <p className="text-xs text-muted-foreground">10438938@mackenzista.com.br / LuizBatista123@</p>
-                  </div>
+                  {showDemoCredentials && (
+                    <div className="mt-4 rounded-lg bg-secondary/60 p-3">
+                      <p className="mb-1 text-xs font-display font-semibold text-foreground">Credenciais de demonstração</p>
+                      <p className="text-xs text-muted-foreground">10427372@mackenzista.com.br / JosePedro123@</p>
+                      <p className="text-xs text-muted-foreground">10437996@mackenzista.com.br / GustavoNeto123@</p>
+                      <p className="text-xs text-muted-foreground">10443681@mackenzista.com.br / GabrielLabarca123@</p>
+                      <p className="text-xs text-muted-foreground">10438932@mackenzista.com.br / VitorCosta123@</p>
+                      <p className="text-xs text-muted-foreground">10438938@mackenzista.com.br / LuizBatista123@</p>
+                    </div>
+                  )}
                   {isAuthenticating && <p className="pt-2 text-center font-body text-xs text-muted-foreground">Conectando com a API...</p>}
                   <p className="mt-4 text-center font-body text-sm text-muted-foreground">
                     Novo usuário?{' '}
                     <Link to="/register" className="font-semibold text-foreground underline underline-offset-2">
                       Criar conta
+                    </Link>
+                  </p>
+                  <p className="mt-2 text-center font-body text-sm text-muted-foreground">
+                    <Link to="/forgot-password" className="text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2">
+                      Esqueci minha senha
                     </Link>
                   </p>
                 </CardContent>

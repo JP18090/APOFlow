@@ -96,6 +96,20 @@ export function checkFirstAccess(email: string) {
   });
 }
 
+export function forgotPassword(email: string) {
+  return request<{ message: string }>('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function resetPassword(token: string, novaSenha: string) {
+  return request<{ message: string }>('/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token, novaSenha }),
+  });
+}
+
 export const api = {
   post: <T>(path: string, data?: unknown) => request<T>(path, {
     method: 'POST',

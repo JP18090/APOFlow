@@ -2,25 +2,22 @@ package com.apoflow.backend.api;
 
 import com.apoflow.backend.api.dto.LoginRequest;
 import com.apoflow.backend.api.dto.AuthResponse;
-import com.apoflow.backend.service.AuthService;
-import com.apoflow.backend.service.TwoFactorService;
-import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.apoflow.backend.api.dto.RegisterRequest;
 import com.apoflow.backend.api.dto.ChangePasswordRequest;
-import com.apoflow.backend.api.dto.AuthResponse;
+import com.apoflow.backend.api.dto.ForgotPasswordRequest;
+import com.apoflow.backend.api.dto.ResetPasswordRequest;
+import com.apoflow.backend.domain.AppUser;
 import com.apoflow.backend.domain.Role;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import com.apoflow.backend.domain.Student;
 import com.apoflow.backend.repository.AppUserRepository;
 import com.apoflow.backend.repository.StudentRepository;
 import com.apoflow.backend.security.JwtTokenProvider;
-import com.apoflow.backend.domain.AppUser;
+import com.apoflow.backend.service.AuthService;
+import com.apoflow.backend.service.PasswordResetService;
+import com.apoflow.backend.service.TwoFactorService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -37,16 +34,32 @@ public class AuthController {
     private final StudentRepository studentRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final TwoFactorService twoFactorService;
+    private final PasswordResetService passwordResetService;
 
     public AuthController(AuthService authService, PasswordEncoder passwordEncoder,
                          AppUserRepository userRepository, StudentRepository studentRepository,
-                         JwtTokenProvider jwtTokenProvider, TwoFactorService twoFactorService) {
+                         JwtTokenProvider jwtTokenProvider, TwoFactorService twoFactorService,
+                         PasswordResetService passwordResetService) {
         this.authService = authService;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.studentRepository = studentRepository;
         this.jwtTokenProvider = jwtTokenProvider;
         this.twoFactorService = twoFactorService;
+        this.passwordResetService = passwordResetService;
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        passwordResetService.requestReset(request.email());
+        return ResponseEntity.ok(Map.of("message",
+                "Se o e-mail estiver cadastrado, você receberá as instruções em breve."));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request.token(), request.novaSenha());
+        return ResponseEntity.ok(Map.of("message", "Senha redefinida com sucesso. Faça login."));
     }
 
     @PostMapping("/login")

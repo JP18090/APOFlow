@@ -74,7 +74,9 @@ public class SecurityConfig {
                     "/lancamento",
                     "/notificacoes",
                     "/change-password",
-                    "/register"
+                    "/register",
+                    "/forgot-password",
+                    "/reset-password"
                 ).permitAll()
                         .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
