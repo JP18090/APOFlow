@@ -17,38 +17,18 @@ services:
       - -jar
       - /app/app.jar
     restart: unless-stopped
-    expose:
-      - "8080"
+    ports:
+      - "80:8080"
     depends_on:
       - mongodb
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/apoflow
       - SPRING_MONGODB_URI=mongodb://mongodb:27017/apoflow
+      - APP_BASE_URL=${APP_BASE_URL:-http://localhost}
+      - APP_CORS_ALLOWED_ORIGINS=${APP_CORS_ALLOWED_ORIGINS:-http://localhost,http://localhost:3000,http://localhost:5173}
       - EMAIL_ENABLED=true
       - MAILERSEND_TOKEN=${MAILERSEND_TOKEN}
       - MAILERSEND_FROM=${MAILERSEND_FROM}
 
-  proxy:
-    image: caddy:2.8-alpine
-    restart: unless-stopped
-    depends_on:
-      - apoflow
-    ports:
-      - "80:80"
-      - "443:443"
-    environment:
-      - APOFLOW_SITE_ADDRESS=${APOFLOW_SITE_ADDRESS:-localhost}
-      - APOFLOW_TLS_MODE=${APOFLOW_TLS_MODE:-internal}
-      - TLS_EMAIL=${TLS_EMAIL:-}
-    volumes:
-      - ./deploy/caddy/entrypoint.sh:/usr/local/bin/apoflow-caddy-entrypoint.sh:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    entrypoint:
-      - /bin/sh
-      - /usr/local/bin/apoflow-caddy-entrypoint.sh
-
 volumes:
   mongo_data:
-  caddy_data:
-  caddy_config:
