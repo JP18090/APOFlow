@@ -10,6 +10,7 @@ import MinhasAPOs from '@/pages/MinhasAPOs';
 import Pendencias from '@/pages/Pendencias';
 import Votacao from '@/pages/Votacao';
 import AvaliacaoFinal from '@/pages/AvaliacaoFinal';
+import AdminUsersRoute from '@/pages/AdminUsersRoute';
 import Lancamento from '@/pages/Lancamento';
 import NotificacoesRoute from '@/pages/NotificacoesRoute';
 import NotFound from '@/pages/NotFound';
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/votacao" element={<Votacao />} />
             <Route path="/avaliacao-final" element={<AvaliacaoFinal />} />
             <Route path="/lancamento" element={<Lancamento />} />
+            <Route path="/usuarios" element={<AdminUsersRoute />} />
             <Route path="/notificacoes" element={<NotificacoesRoute />} />
             <Route path="/perfil" element={<PerfilRoute />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />

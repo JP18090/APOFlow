@@ -43,6 +43,12 @@ variable "instance_type" {
   default     = "t3.small"
 }
 
+variable "docker_data_volume_size" {
+  description = "Tamanho (GB) do volume EBS dedicado aos dados do Docker"
+  type        = number
+  default     = 30
+}
+
 variable "ec2_key_pair_name" {
   description = "Nome da key pair para SSH"
   type        = string
@@ -64,4 +70,27 @@ variable "jwt_secret" {
   description = "Chave secreta para assinar tokens JWT (mínimo 32 caracteres)"
   type        = string
   sensitive   = true
+}
+
+variable "apoflow_site_address" {
+  description = "Dominio, hostname ou IP usado pelo proxy HTTPS. Se vazio, a EC2 usa o IP publico automaticamente."
+  type        = string
+  default     = ""
+}
+
+variable "apoflow_tls_mode" {
+  description = "Modo TLS do proxy reverso: internal (certificado interno) ou public (Let's Encrypt com dominio valido)."
+  type        = string
+  default     = "internal"
+
+  validation {
+    condition     = contains(["internal", "public"], var.apoflow_tls_mode)
+    error_message = "apoflow_tls_mode deve ser internal ou public."
+  }
+}
+
+variable "tls_email" {
+  description = "E-mail usado pelo ACME/Let's Encrypt quando apoflow_tls_mode=public."
+  type        = string
+  default     = ""
 }

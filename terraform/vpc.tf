@@ -114,14 +114,3 @@ resource "aws_security_group" "apoflow_ec2_sg" {
     Name = "apoflow-ec2-sg"
   }
 }
-
-# Porta 8080 liberada publicamente (Spring Boot + SPA)
-resource "aws_vpc_security_group_ingress_rule" "apoflow_ec2_8080" {
-  security_group_id = aws_security_group.apoflow_ec2_sg.id
-  from_port         = 8080
-  to_port           = 8080
-  ip_protocol       = "tcp"
-  cidr_ipv4         = "0.0.0.0/0"
-
-  tags = { Name = "apoflow-ec2-8080" }
-}

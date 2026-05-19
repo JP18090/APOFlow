@@ -19,7 +19,16 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 function getStoredUser() {
   if (typeof window === 'undefined') return null;
   const value = window.localStorage.getItem(STORAGE_KEY);
-  return value ? (JSON.parse(value) as Usuario) : null;
+  if (!value) return null;
+  const parsed = JSON.parse(value) as Partial<Usuario>;
+  if (!parsed.id || !parsed.nome || !parsed.email || !parsed.papel) return null;
+  return {
+    id: parsed.id,
+    nome: parsed.nome,
+    email: parsed.email,
+    papel: parsed.papel,
+    papeis: parsed.papeis && parsed.papeis.length > 0 ? parsed.papeis : [parsed.papel],
+  } as Usuario;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -48,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (res.mensagem === 'OTP_REQUIRED') {
             setPendingOtpEmail(res.email);
           } else if (res.token) {
-            setUser({ id: res.userId, nome: res.nome, email: res.email, papel: res.papel });
+            setUser({ id: res.userId, nome: res.nome, email: res.email, papel: res.papel, papeis: res.papeis });
           }
         } finally {
           setIsAuthenticating(false);
@@ -60,15 +69,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           const res = await verifyOtpRequest(pendingOtpEmail, code);
           setPendingOtpEmail(null);
-          setUser({ id: res.userId, nome: res.nome, email: res.email, papel: res.papel });
+          setUser({ id: res.userId, nome: res.nome, email: res.email, papel: res.papel, papeis: res.papeis });
         } finally {
           setIsAuthenticating(false);
         }
       },
       switchProfessorRole: (role) => {
         if (!user) return;
-        if (!['orientador', 'comissao', 'coordenacao'].includes(user.papel)) return;
+        const allowedRoles = user.papeis.filter((entry) => ['orientador', 'comissao', 'coordenacao'].includes(entry));
+        if (allowedRoles.length < 2) return;
         if (!['orientador', 'comissao', 'coordenacao'].includes(role)) return;
+        if (!allowedRoles.includes(role)) return;
         setUser({ ...user, papel: role });
       },
       logout: () => {

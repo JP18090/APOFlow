@@ -8,6 +8,7 @@ import {
   LogOut,
   ShieldCheck,
   User,
+  Users,
   Vote,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -35,6 +36,10 @@ interface NavItem {
 }
 
 const navByRole: Record<Role, NavItem[]> = {
+  admin: [
+    { title: 'Usuários', url: '/usuarios', icon: Users },
+    { title: 'Meu Perfil', url: '/perfil', icon: User },
+  ],
   aluno: [
     { title: 'Painel', url: '/', icon: LayoutDashboard },
     { title: 'Nova APO', url: '/nova-apo', icon: FilePlus },
@@ -69,6 +74,7 @@ const navByRole: Record<Role, NavItem[]> = {
 };
 
 const roleLabels: Record<Role, string> = {
+  admin: 'Administrador',
   aluno: 'Aluno',
   orientador: 'Orientador',
   comissao: 'Comissão',
@@ -88,7 +94,8 @@ export function AppSidebar() {
   }
 
   const items = navByRole[user.papel];
-  const canSwitchProfessorRole = ['orientador', 'comissao', 'coordenacao'].includes(user.papel);
+  const availableProfessorRoles = user.papeis.filter((entry) => ['orientador', 'comissao', 'coordenacao'].includes(entry));
+  const canSwitchProfessorRole = availableProfessorRoles.length > 1;
 
   const changeRole = (nextRole: Role) => {
     switchProfessorRole(nextRole);
@@ -138,9 +145,9 @@ export function AppSidebar() {
                   value={user.papel}
                   onChange={(event) => changeRole(event.target.value as Role)}
                 >
-                  <option value="orientador">Orientador</option>
-                  <option value="comissao">Comissão</option>
-                  <option value="coordenacao">Coordenação</option>
+                  {availableProfessorRoles.includes('orientador') && <option value="orientador">Orientador</option>}
+                  {availableProfessorRoles.includes('comissao') && <option value="comissao">Comissão</option>}
+                  {availableProfessorRoles.includes('coordenacao') && <option value="coordenacao">Coordenação</option>}
                 </select>
               </div>
             )}

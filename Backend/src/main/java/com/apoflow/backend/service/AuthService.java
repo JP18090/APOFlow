@@ -2,10 +2,13 @@ package com.apoflow.backend.service;
 
 import com.apoflow.backend.api.dto.AuthResponse;
 import com.apoflow.backend.domain.AppUser;
+import com.apoflow.backend.domain.Role;
 import com.apoflow.backend.repository.AppUserRepository;
 import com.apoflow.backend.security.JwtTokenProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * Validates credentials and initiates the 2FA OTP flow.
@@ -43,10 +46,25 @@ public class AuthService {
             throw new IllegalArgumentException("Usuario inativo ou bloqueado.");
         }
 
+        if (user.getPapel() == Role.ADMIN) {
+            String token = jwtTokenProvider.generateToken(user.getEmail());
+            return new AuthResponse(token, user.getId(), user.getEmail(), user.getNome(),
+                user.getPapel().name().toLowerCase(), roleNames(user), user.isPrimeiroAcesso(), null);
+        }
+
         twoFactorService.initiateOtp(user);
 
         // No token yet – frontend must submit the OTP to complete login.
         return new AuthResponse(null, user.getId(), user.getEmail(), user.getNome(),
-                user.getPapel().name().toLowerCase(), user.isPrimeiroAcesso(), "OTP_REQUIRED");
+            user.getPapel().name().toLowerCase(), roleNames(user), user.isPrimeiroAcesso(), "OTP_REQUIRED");
     }
+
+        private List<String> roleNames(AppUser user) {
+        List<Role> effectiveRoles = (user.getPapeis() != null && !user.getPapeis().isEmpty())
+            ? user.getPapeis()
+            : List.of(user.getPapel());
+        return effectiveRoles.stream()
+            .map(role -> role.name().toLowerCase())
+            .toList();
+        }
 }

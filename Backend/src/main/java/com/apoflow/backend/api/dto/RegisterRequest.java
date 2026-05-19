@@ -7,7 +7,6 @@ public record RegisterRequest(
     @NotBlank(message = "Nome é obrigatório.") String nome,
     @Email(message = "Email deve ser válido.")
     @NotBlank(message = "Email é obrigatório.") String email,
-    @NotBlank(message = "Senha é obrigatória.") String senha,
-    @NotBlank(message = "Papel é obrigatório.") String papel
+    @NotBlank(message = "Senha é obrigatória.") String senha
 ) {
 }

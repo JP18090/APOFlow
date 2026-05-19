@@ -38,7 +38,9 @@ public class DataInitializer {
         return args -> {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-            if (userRepository.count() > 0) {
+                        ensureAdminUser(userRepository, passwordEncoder);
+
+                        if (userRepository.count() > 1) {
                 return;
             }
 
@@ -49,6 +51,7 @@ public class DataInitializer {
             aluno.setEmail("10427372@mackenzista.com.br");
             aluno.setSenhaHash(passwordEncoder.encode(resolveSeedPassword("SEED_ALUNO_PASSWORD", "JosePedro123@")));
             aluno.setPapel(Role.ALUNO);
+            aluno.setPapeis(List.of(Role.ALUNO));
             aluno.setPrimeiroAcesso(true);
             aluno.setRequerMudancaSenha(true);
             aluno.setHabilitado(true);
@@ -80,6 +83,7 @@ public class DataInitializer {
             comissao.setEmail("10443681@mackenzista.com.br");
             comissao.setSenhaHash(passwordEncoder.encode(resolveSeedPassword("SEED_COMISSAO_PASSWORD", "GabrielLabarca123@")));
             comissao.setPapel(Role.COMISSAO);
+            comissao.setPapeis(List.of(Role.COMISSAO));
             comissao.setPrimeiroAcesso(true);
             comissao.setRequerMudancaSenha(true);
             comissao.setHabilitado(true);
@@ -95,6 +99,7 @@ public class DataInitializer {
             coordenacao.setEmail("10438932@mackenzista.com.br");
             coordenacao.setSenhaHash(passwordEncoder.encode(resolveSeedPassword("SEED_COORDENACAO_PASSWORD", "VitorCosta123@")));
             coordenacao.setPapel(Role.COORDENACAO);
+            coordenacao.setPapeis(List.of(Role.COORDENACAO));
             coordenacao.setPrimeiroAcesso(true);
             coordenacao.setRequerMudancaSenha(true);
             coordenacao.setHabilitado(true);
@@ -110,6 +115,7 @@ public class DataInitializer {
             secretaria.setEmail("10438938@mackenzista.com.br");
             secretaria.setSenhaHash(passwordEncoder.encode(resolveSeedPassword("SEED_SECRETARIA_PASSWORD", "LuizBatista123@")));
             secretaria.setPapel(Role.SECRETARIA);
+            secretaria.setPapeis(List.of(Role.SECRETARIA));
             secretaria.setPrimeiroAcesso(true);
             secretaria.setRequerMudancaSenha(true);
             secretaria.setHabilitado(true);
@@ -162,6 +168,29 @@ public class DataInitializer {
             ));
         };
     }
+
+        private static void ensureAdminUser(AppUserRepository userRepository, PasswordEncoder passwordEncoder) {
+                if (userRepository.findByEmailIgnoreCase("admin@mackenzie.com").isPresent()) {
+                        return;
+                }
+
+                AppUser admin = new AppUser();
+                admin.setId("admin-1");
+                admin.setNome("Administrador APOFlow");
+                admin.setEmail("admin@mackenzie.com");
+                admin.setSenhaHash(passwordEncoder.encode(resolveSeedPassword("SEED_ADMIN_PASSWORD", "ADMmack123")));
+                admin.setPapel(Role.ADMIN);
+                admin.setPapeis(List.of(Role.ADMIN));
+                admin.setPrimeiroAcesso(false);
+                admin.setRequerMudancaSenha(false);
+                admin.setHabilitado(true);
+                admin.setContaNaoExpirada(true);
+                admin.setContaNaoBloqueada(true);
+                admin.setCredenciaisNaoExpiradas(true);
+                admin.setCriadoEm(LocalDateTime.now());
+                admin.setAtualizadoEm(LocalDateTime.now());
+                userRepository.save(admin);
+        }
 
     private static Apo apo(String id, String titulo, String tipo, String descricao, int pontos, String alunoId, String aluno, String orientadorId,
                            ApoStatus status, LocalDate dataAtualizacao, List<String> anexos, List<ApoVote> votos) {

@@ -1,4 +1,4 @@
-export type Role = 'aluno' | 'orientador' | 'comissao' | 'coordenacao' | 'secretaria';
+export type Role = 'admin' | 'aluno' | 'orientador' | 'comissao' | 'coordenacao' | 'secretaria';
 
 export type BadgeTone = 'default' | 'destructive' | 'secondary' | 'outline';
 
@@ -18,6 +18,7 @@ export interface Usuario {
   id: string;
   nome: string;
   papel: Role;
+  papeis: Role[];
   email: string;
 }
 

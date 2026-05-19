@@ -10,10 +10,8 @@ import com.apoflow.backend.domain.AppUser;
 import com.apoflow.backend.domain.Role;
 import com.apoflow.backend.repository.AppUserRepository;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class AppUserDetailsService implements UserDetailsService {
@@ -37,14 +35,6 @@ public class AppUserDetailsService implements UserDetailsService {
         List<Role> effectiveRoles = (appUser.getPapeis() != null && !appUser.getPapeis().isEmpty())
                 ? appUser.getPapeis()
                 : List.of(appUser.getPapel());
-
-        // Professor-role users can switch between orientador/comissao/coordenacao in the UI,
-        // so grant all three professor roles simultaneously to avoid 403s after role-switch.
-        Set<Role> professorRoles = EnumSet.of(Role.ORIENTADOR, Role.COMISSAO, Role.COORDENACAO);
-        boolean isProfessor = effectiveRoles.stream().anyMatch(professorRoles::contains);
-        if (isProfessor) {
-            effectiveRoles = new ArrayList<>(professorRoles);
-        }
 
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
         for (Role r : effectiveRoles) {

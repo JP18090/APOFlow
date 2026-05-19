@@ -10,3 +10,10 @@ ec2_key_pair_name = "apoflow-key"   # nome exato do key pair criado na AWS
 mailersend_token  = "mlsn.SEU_TOKEN_AQUI"
 mailersend_from   = "seu@email.com"
 jwt_secret        = "sua-chave-secreta-jwt-com-32-chars-minimo"
+
+# HTTPS
+# Use um dominio valido apontado para a EC2 se quiser certificado publico.
+# Se deixar vazio, a EC2 usa o IP publico e sobe HTTPS com certificado interno.
+apoflow_site_address = ""
+apoflow_tls_mode     = "internal"
+tls_email            = "admin@seudominio.com"

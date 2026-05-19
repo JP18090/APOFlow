@@ -11,8 +11,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { deleteAccount, getProfile, updateProfile } from '@/lib/api';
 import { toast } from 'sonner';
 
-const PERIODOS = ['MATUTINO', 'VESPERTINO', 'NOTURNO'] as const;
-
 export default function PerfilPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -35,13 +33,9 @@ export default function PerfilPage() {
 
   const updateMutation = useMutation({
     mutationFn: () => {
-      const payload: Record<string, string | number | null> = {};
+      const payload: Record<string, string | null> = {};
       for (const [key, val] of Object.entries(form)) {
-        if (key === 'semestre') {
-          payload[key] = val === '' ? null : Number(val);
-        } else {
-          payload[key] = val;
-        }
+        payload[key] = val;
       }
       return updateProfile(payload);
     },
@@ -71,7 +65,6 @@ export default function PerfilPage() {
     return <div className="p-6 text-muted-foreground font-body text-sm">Carregando perfil...</div>;
   }
 
-  const isAluno = profile.papel === 'aluno';
   const isProfessor = ['orientador', 'comissao', 'coordenacao', 'secretaria'].includes(profile.papel);
 
   return (
@@ -123,38 +116,6 @@ export default function PerfilPage() {
             <Label className="font-display text-sm">URL da foto de perfil</Label>
             <Input value={getValue('fotoUrl', profile.fotoUrl) as string} onChange={set('fotoUrl')} placeholder="https://..." />
           </div>
-
-          {isAluno && (
-            <>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label className="font-display text-sm">RA</Label>
-                  <Input value={getValue('ra', profile.ra) as string} onChange={set('ra')} placeholder="Ex: 10427372" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="font-display text-sm">Semestre</Label>
-                  <Input type="number" min={1} max={12} value={getValue('semestre', profile.semestre) as string} onChange={set('semestre')} placeholder="Ex: 4" />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="font-display text-sm">Curso</Label>
-                <Input value={getValue('curso', profile.curso) as string} onChange={set('curso')} placeholder="Ex: Engenharia de Computação" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="font-display text-sm">Período</Label>
-                <select
-                  className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  value={getValue('periodo', profile.periodo) as string}
-                  onChange={set('periodo')}
-                >
-                  <option value="">Selecione...</option>
-                  {PERIODOS.map((p) => (
-                    <option key={p} value={p}>{p.charAt(0) + p.slice(1).toLowerCase()}</option>
-                  ))}
-                </select>
-              </div>
-            </>
-          )}
 
           {isProfessor && (
             <div className="space-y-1.5">

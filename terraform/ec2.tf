@@ -38,12 +38,16 @@ resource "aws_instance" "apoflow_server" {
     mailersend_token = var.mailersend_token
     mailersend_from  = var.mailersend_from
     jwt_secret       = var.jwt_secret
+    apoflow_site_address = var.apoflow_site_address
+    apoflow_tls_mode = var.apoflow_tls_mode
+    tls_email        = var.tls_email
+    docker_data_device_name = "/dev/sdh"
   })
 
   root_block_device {
     volume_type           = "gp3"
     volume_size           = 20
-    delete_on_termination = true
+    delete_on_termination = false
     encrypted             = true
 
     tags = {
@@ -58,6 +62,23 @@ resource "aws_instance" "apoflow_server" {
   }
 
   depends_on = [aws_internet_gateway.apoflow_igw]
+}
+
+resource "aws_ebs_volume" "docker_data" {
+  availability_zone = aws_instance.apoflow_server.availability_zone
+  size              = var.docker_data_volume_size
+  type              = "gp3"
+  encrypted         = true
+
+  tags = {
+    Name = "apoflow-docker-data"
+  }
+}
+
+resource "aws_volume_attachment" "docker_data_attachment" {
+  device_name = "/dev/sdh"
+  volume_id   = aws_ebs_volume.docker_data.id
+  instance_id = aws_instance.apoflow_server.id
 }
 
 # Elastic IP para EC2

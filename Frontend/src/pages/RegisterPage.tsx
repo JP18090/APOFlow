@@ -10,21 +10,12 @@ import { register } from '@/lib/api';
 import { toast } from 'sonner';
 import { useNavigate, Link } from 'react-router-dom';
 
-const ROLE_OPTIONS = [
-  { value: 'aluno', label: 'Aluno', group: 'Discente' },
-  { value: 'orientador', label: 'Orientador', group: 'Docente' },
-  { value: 'comissao', label: 'Membro da Comissão', group: 'Docente' },
-  { value: 'coordenacao', label: 'Coordenação', group: 'Docente' },
-  { value: 'secretaria', label: 'Secretaria', group: 'Docente' },
-];
-
 export default function RegisterPage() {
   const navigate = useNavigate();
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmSenha, setConfirmSenha] = useState('');
-  const [papel, setPapel] = useState('aluno');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: FormEvent) => {
@@ -39,7 +30,7 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      await register(nome.trim(), email.trim(), senha, papel);
+      await register(nome.trim(), email.trim(), senha);
       toast.success('Conta criada com sucesso! Faça login para continuar.');
       navigate('/');
     } catch (error) {
@@ -48,9 +39,6 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
-
-  const discente = ROLE_OPTIONS.filter((r) => r.group === 'Discente');
-  const docente = ROLE_OPTIONS.filter((r) => r.group === 'Docente');
 
   return (
     <div className="relative min-h-screen bg-gradient-hero flex items-center justify-center p-4">
@@ -102,44 +90,11 @@ export default function RegisterPage() {
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <Label className="font-display text-sm">Perfil de acesso</Label>
-                <div className="space-y-2">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Discente</p>
-                  <div className="flex flex-wrap gap-2">
-                    {discente.map((r) => (
-                      <button
-                        key={r.value}
-                        type="button"
-                        onClick={() => setPapel(r.value)}
-                        className={`rounded-full px-3 py-1 text-xs font-display font-medium border transition-colors ${
-                          papel === r.value
-                            ? 'bg-gradient-accent text-accent-foreground border-transparent'
-                            : 'bg-secondary text-foreground border-border hover:bg-secondary/80'
-                        }`}
-                      >
-                        {r.label}
-                      </button>
-                    ))}
-                  </div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide pt-1">Docente / Equipe</p>
-                  <div className="flex flex-wrap gap-2">
-                    {docente.map((r) => (
-                      <button
-                        key={r.value}
-                        type="button"
-                        onClick={() => setPapel(r.value)}
-                        className={`rounded-full px-3 py-1 text-xs font-display font-medium border transition-colors ${
-                          papel === r.value
-                            ? 'bg-gradient-accent text-accent-foreground border-transparent'
-                            : 'bg-secondary text-foreground border-border hover:bg-secondary/80'
-                        }`}
-                      >
-                        {r.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+              <div className="rounded-2xl border border-border/60 bg-secondary/30 p-4">
+                <p className="font-display text-sm font-semibold text-foreground">Cadastro inicial</p>
+                <p className="mt-1 font-body text-sm text-muted-foreground">
+                  Toda nova conta é criada como aluno. A mudança para orientador ou comissão é feita depois pelo administrador.
+                </p>
               </div>
 
               <div className="space-y-1.5">

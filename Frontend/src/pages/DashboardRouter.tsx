@@ -1,6 +1,7 @@
 import AppLayout from '@/components/AppLayout';
 import LoginPage from '@/components/LoginPage';
 import { useAuth } from '@/contexts/AuthContext';
+import AdminUsersPage from '@/pages/AdminUsersPage';
 import AlunoDashboard from '@/pages/AlunoDashboard';
 import ComissaoDashboard from '@/pages/ComissaoDashboard';
 import CoordenacaoDashboard from '@/pages/CoordenacaoDashboard';
@@ -15,6 +16,7 @@ export default function DashboardRouter() {
   }
 
   const dashboards = {
+    admin: <AdminUsersPage />,
     aluno: <AlunoDashboard />,
     orientador: <OrientadorDashboard />,
     comissao: <ComissaoDashboard />,

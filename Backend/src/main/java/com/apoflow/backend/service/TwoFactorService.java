@@ -3,6 +3,7 @@ package com.apoflow.backend.service;
 import com.apoflow.backend.api.dto.AuthResponse;
 import com.apoflow.backend.domain.AppUser;
 import com.apoflow.backend.domain.OtpCode;
+import com.apoflow.backend.domain.Role;
 import com.apoflow.backend.repository.AppUserRepository;
 import com.apoflow.backend.repository.OtpCodeRepository;
 import com.apoflow.backend.security.JwtTokenProvider;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class TwoFactorService {
@@ -69,6 +71,15 @@ public class TwoFactorService {
 
         String token = jwtTokenProvider.generateToken(user.getEmail());
         return new AuthResponse(token, user.getId(), user.getEmail(), user.getNome(),
-                user.getPapel().name().toLowerCase(), user.isPrimeiroAcesso(), null);
+            user.getPapel().name().toLowerCase(), roleNames(user), user.isPrimeiroAcesso(), null);
     }
+
+        private List<String> roleNames(AppUser user) {
+        List<Role> effectiveRoles = (user.getPapeis() != null && !user.getPapeis().isEmpty())
+            ? user.getPapeis()
+            : List.of(user.getPapel());
+        return effectiveRoles.stream()
+            .map(role -> role.name().toLowerCase())
+            .toList();
+        }
 }

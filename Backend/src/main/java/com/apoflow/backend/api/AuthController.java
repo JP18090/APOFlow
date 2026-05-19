@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -83,18 +84,12 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("message", "E-mail já cadastrado. Tente outro ou faça login."));
         }
 
-        Role papel;
-        try {
-            papel = Role.valueOf(registerRequest.papel().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Perfil inválido: " + registerRequest.papel()));
-        }
         AppUser newUser = new AppUser();
         newUser.setNome(registerRequest.nome());
         newUser.setEmail(registerRequest.email());
         newUser.setSenhaHash(passwordEncoder.encode(registerRequest.senha()));
-        newUser.setPapel(papel);
-        newUser.setPapeis(java.util.List.of(papel));
+        newUser.setPapel(Role.ALUNO);
+        newUser.setPapeis(List.of(Role.ALUNO));
         newUser.setPrimeiroAcesso(false);
         newUser.setRequerMudancaSenha(false);
         newUser.setHabilitado(true);
@@ -105,10 +100,7 @@ public class AuthController {
         newUser.setAtualizadoEm(LocalDateTime.now());
 
         userRepository.save(newUser);
-
-        if (papel == Role.ALUNO) {
-            studentRepository.save(new Student(newUser.getId(), newUser.getNome(), null, 0));
-        }
+    studentRepository.save(new Student(newUser.getId(), newUser.getNome(), null, 0));
 
         String token = jwtTokenProvider.generateToken(registerRequest.email());
 
@@ -118,6 +110,7 @@ public class AuthController {
                 newUser.getEmail(),
                 newUser.getNome(),
                 newUser.getPapel().name().toLowerCase(),
+        List.of(Role.ALUNO.name().toLowerCase()),
                 false,
                 "Usuário registrado com sucesso"
         ));

@@ -48,6 +48,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const queryKeys = {
   apos: ['apos'] as const,
   students: ['students'] as const,
+  users: ['users'] as const,
   notifications: (recipient: string) => ['notifications', recipient] as const,
 };
 
@@ -57,14 +58,15 @@ export interface AuthResult {
   email: string;
   nome: string;
   papel: Role;
+  papeis: Role[];
   primeiroAcesso: boolean;
   mensagem?: string | null;
 }
 
-export function register(nome: string, email: string, senha: string, papel: string) {
+export function register(nome: string, email: string, senha: string) {
   return request<AuthResult>('/auth/register', {
     method: 'POST',
-    body: JSON.stringify({ nome, email, senha, papel }),
+    body: JSON.stringify({ nome, email, senha }),
   }).then((res) => { if (res.token) storeToken(res.token); return res; });
 }
 
@@ -72,6 +74,9 @@ export function login(email: string, senha: string) {
   return request<AuthResult>('/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, senha }),
+  }).then((res) => {
+    if (res.token) storeToken(res.token);
+    return res;
   });
   // NOTE: login now only triggers OTP - token comes from verifyOtp
 }
@@ -185,10 +190,8 @@ export interface UserProfile {
   nome: string;
   email: string;
   papel: string;
-  ra: string | null;
+  papeis: Role[];
   fotoUrl: string | null;
-  curso: string | null;
-  semestre: number | null;
   periodo: string | null;
   drt: string | null;
 }
@@ -201,6 +204,32 @@ export function updateProfile(payload: Partial<Omit<UserProfile, 'id' | 'email' 
   return request<UserProfile>('/users/me', {
     method: 'PUT',
     body: JSON.stringify(payload),
+  });
+}
+
+export interface AdminUser {
+  id: string;
+  nome: string;
+  email: string;
+  papel: Role;
+  papeis: Role[];
+  drt: string | null;
+}
+
+export function getUsers() {
+  return request<AdminUser[]>('/users');
+}
+
+export function updateUserRoles(userId: string, papeis: Role[]) {
+  return request<AdminUser>(`/users/${encodeURIComponent(userId)}/roles`, {
+    method: 'PUT',
+    body: JSON.stringify({ papeis }),
+  });
+}
+
+export function deleteUser(userId: string) {
+  return request<{ message: string }>(`/users/${encodeURIComponent(userId)}`, {
+    method: 'DELETE',
   });
 }
 

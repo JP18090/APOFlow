@@ -7,8 +7,12 @@ RUN npm ci
 COPY Frontend/ ./
 RUN npm run build
 
-FROM maven:3.9.9-eclipse-temurin-21 AS backend-build
+FROM eclipse-temurin:25-jdk AS backend-build
 WORKDIR /workspace/Backend
+
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends maven \
+	&& rm -rf /var/lib/apt/lists/*
 
 COPY Backend/pom.xml ./
 RUN mvn -q -DskipTests dependency:go-offline
@@ -18,11 +22,11 @@ RUN mkdir -p src/main/resources/static
 COPY --from=frontend-build /workspace/Frontend/dist/ src/main/resources/static/
 RUN mvn -q -DskipTests clean package
 
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:25-jre
 WORKDIR /app
 
 COPY --from=backend-build /workspace/Backend/target/backend-0.1.0.jar app.jar
 
-EXPOSE 7860
+EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

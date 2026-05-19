@@ -1,6 +1,7 @@
 services:
   mongodb:
     image: mongo:7.0
+    restart: unless-stopped
     ports:
       - "27017:27017"
     volumes:
@@ -10,15 +11,44 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
+    command:
+      - java
+      - -Dspring.mongodb.uri=mongodb://mongodb:27017/apoflow
+      - -jar
+      - /app/app.jar
+    restart: unless-stopped
+    expose:
+      - "8080"
     depends_on:
       - mongodb
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/apoflow
+      - SPRING_MONGODB_URI=mongodb://mongodb:27017/apoflow
       - EMAIL_ENABLED=true
       - MAILERSEND_TOKEN=${MAILERSEND_TOKEN}
       - MAILERSEND_FROM=${MAILERSEND_FROM}
 
+  proxy:
+    image: caddy:2.8-alpine
+    restart: unless-stopped
+    depends_on:
+      - apoflow
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - APOFLOW_SITE_ADDRESS=${APOFLOW_SITE_ADDRESS:-localhost}
+      - APOFLOW_TLS_MODE=${APOFLOW_TLS_MODE:-internal}
+      - TLS_EMAIL=${TLS_EMAIL:-}
+    volumes:
+      - ./deploy/caddy/entrypoint.sh:/usr/local/bin/apoflow-caddy-entrypoint.sh:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    entrypoint:
+      - /bin/sh
+      - /usr/local/bin/apoflow-caddy-entrypoint.sh
+
 volumes:
   mongo_data:
+  caddy_data:
+  caddy_config:

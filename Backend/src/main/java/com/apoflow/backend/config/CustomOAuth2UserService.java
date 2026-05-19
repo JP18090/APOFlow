@@ -9,6 +9,7 @@ import com.apoflow.backend.domain.AppUser;
 import com.apoflow.backend.domain.Role;
 import com.apoflow.backend.repository.AppUserRepository;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,6 +43,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             newUser.setEmail(email);
             newUser.setSenhaHash(passwordEncoder.encode(UUID.randomUUID().toString() + "-oauth"));
             newUser.setPapel(Role.ALUNO);
+            newUser.setPapeis(List.of(Role.ALUNO));
             newUser.setGoogleId(googleId);
             newUser.setProvedorOauth(provider);
             newUser.setPrimeiroAcesso(false);
