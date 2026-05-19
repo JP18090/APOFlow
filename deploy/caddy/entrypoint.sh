@@ -2,7 +2,7 @@
 set -eu
 
 SITE_ADDRESS="${APOFLOW_SITE_ADDRESS:-localhost}"
-TLS_MODE="${APOFLOW_TLS_MODE:-internal}"
+TLS_MODE="${APOFLOW_TLS_MODE:-off}"
 TLS_EMAIL="${TLS_EMAIL:-}"
 
 mkdir -p /etc/caddy
@@ -23,10 +23,21 @@ ${SITE_ADDRESS} {
   reverse_proxy apoflow:8080
 }
 EOF
-else
+elif [ "$TLS_MODE" = "internal" ]; then
   cat > /etc/caddy/Caddyfile <<EOF
 http://${SITE_ADDRESS}, https://${SITE_ADDRESS} {
   tls internal
+  encode zstd gzip
+  reverse_proxy apoflow:8080
+}
+EOF
+else
+  cat > /etc/caddy/Caddyfile <<EOF
+{
+  auto_https off
+}
+
+:80 {
   encode zstd gzip
   reverse_proxy apoflow:8080
 }
