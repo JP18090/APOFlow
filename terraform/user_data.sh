@@ -98,8 +98,8 @@ fi
 cat > /opt/apoflow/.env <<ENVEOF
 MONGODB_URI=mongodb://mongodb:27017/apoflow
 EMAIL_ENABLED=true
-MAILERSEND_TOKEN=${mailersend_token}
-MAILERSEND_FROM=${mailersend_from}
+BREVO_TOKEN=${brevo_token}
+BREVO_FROM=${brevo_from}
 JWT_SECRET=${jwt_secret}
 APOFLOW_SITE_ADDRESS=${APOFLOW_SITE_ADDRESS}
 APOFLOW_TLS_MODE=${APOFLOW_TLS_MODE}

@@ -55,14 +55,14 @@ variable "ec2_key_pair_name" {
   default     = "apoflow-key"
 }
 
-variable "mailersend_token" {
-  description = "Token da API MailerSend para envio de e-mails"
+variable "brevo_token" {
+  description = "Token da API Brevo para envio de e-mails"
   type        = string
   sensitive   = true
 }
 
-variable "mailersend_from" {
-  description = "Endereço remetente do MailerSend (domínio verificado)"
+variable "brevo_from" {
+  description = "Endereço remetente do Brevo (sender verificado)"
   type        = string
 }
 

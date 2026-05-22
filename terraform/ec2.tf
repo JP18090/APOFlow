@@ -35,8 +35,8 @@ resource "aws_instance" "apoflow_server" {
   key_name               = var.ec2_key_pair_name
 
   user_data = templatefile("${path.module}/user_data.sh", {
-    mailersend_token = var.mailersend_token
-    mailersend_from  = var.mailersend_from
+    brevo_token = var.brevo_token
+    brevo_from  = var.brevo_from
     jwt_secret       = var.jwt_secret
     apoflow_site_address = var.apoflow_site_address
     apoflow_tls_mode = var.apoflow_tls_mode
