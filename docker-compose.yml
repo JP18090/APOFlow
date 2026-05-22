@@ -27,8 +27,8 @@ services:
       - APP_BASE_URL=${APP_BASE_URL:-http://localhost}
       - APP_CORS_ALLOWED_ORIGINS=${APP_CORS_ALLOWED_ORIGINS:-http://localhost,http://localhost:3000,http://localhost:5173}
       - EMAIL_ENABLED=true
-      - MAILERSEND_TOKEN=${MAILERSEND_TOKEN}
-      - MAILERSEND_FROM=${MAILERSEND_FROM}
+      - BREVO_TOKEN=${BREVO_TOKEN}
+      - BREVO_FROM=${BREVO_FROM}
 
 volumes:
   mongo_data:

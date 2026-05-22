@@ -14,12 +14,12 @@ import java.util.Map;
 @Service
 public class EmailService {
 
-    private static final String MAILERSEND_URL = "https://api.mailersend.com/v1/email";
+    private static final String BREVO_URL = "https://api.brevo.com/v3/smtp/email";
 
-    @Value("${mailersend.token:}")
+    @Value("${brevo.token:}")
     private String apiToken;
 
-    @Value("${mailersend.from:MS_apoflow@trial-3z0vklo6omeldpyo.mlsender.net}")
+    @Value("${brevo.from:apoflowmack@gmail.com}")
     private String fromAddress;
 
     @Value("${app.email.enabled:false}")
@@ -35,19 +35,18 @@ public class EmailService {
         }
         try {
             Map<String, Object> payload = Map.of(
-                    "from", Map.of("email", fromAddress, "name", "APOFlow"),
+                    "sender", Map.of("email", fromAddress, "name", "APOFlow"),
                     "to", List.of(Map.of("email", to)),
                     "subject", subject,
-                    "text", body
+                    "textContent", body
             );
 
             String json = objectMapper.writeValueAsString(payload);
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(MAILERSEND_URL))
+                    .uri(URI.create(BREVO_URL))
                     .header("Content-Type", "application/json")
-                    .header("X-Requested-With", "XMLHttpRequest")
-                    .header("Authorization", "Bearer " + apiToken)
+                    .header("api-key", apiToken)
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .build();
 
