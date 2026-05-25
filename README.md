@@ -92,7 +92,7 @@ Combinacoes como orientador + secretaria ou aluno + comissao sao invalidadas no 
 - Spring Security
 - Spring Data MongoDB
 - JWT
-- MailerSend HTTP API
+- Brevo HTTP API
 
 ### 4.3 Infra e operacao
 
@@ -301,8 +301,8 @@ cp .env.example .env
 |---|---|---|
 | MONGODB_URI | string de conexao do MongoDB | mongodb://mongodb:27017/apoflow |
 | EMAIL_ENABLED | habilita envio real de e-mail | true |
-| MAILERSEND_TOKEN | token da API MailerSend | mlsn... |
-| MAILERSEND_FROM | remetente de e-mail | no-reply@seudominio.com |
+| BREVO_API_KEY | chave da API Brevo | xkeysib-... |
+| BREVO_FROM | remetente de e-mail | no-reply@seudominio.com |
 | JWT_SECRET | segredo JWT com pelo menos 32 caracteres | uma-chave-muito-forte... |
 
 ### 10.2 Variaveis do proxy HTTPS
@@ -449,8 +449,8 @@ Objetivo atual: publicar a aplicacao somente por 80/443.
 
 | Variavel | Descricao |
 |---|---|
-| mailersend_token | token do MailerSend |
-| mailersend_from | remetente configurado |
+| brevo_api_key | chave da API Brevo |
+| brevo_from | remetente configurado |
 | jwt_secret | segredo JWT |
 | apoflow_site_address | dominio, hostname ou IP do proxy |
 | apoflow_tls_mode | internal ou public |
@@ -465,8 +465,8 @@ aws_region            = "us-east-1"
 environment           = "production"
 instance_type         = "t3.small"
 ec2_key_pair_name     = "apoflow-key"
-mailersend_token      = "mlsn.SEU_TOKEN_AQUI"
-mailersend_from       = "no-reply@seudominio.com"
+brevo_api_key         = "xkeysib-SUA_CHAVE_AQUI"
+brevo_from            = "no-reply@seudominio.com"
 jwt_secret            = "uma-chave-com-pelo-menos-32-caracteres"
 apoflow_site_address  = ""
 apoflow_tls_mode      = "internal"
@@ -480,8 +480,8 @@ aws_region            = "us-east-1"
 environment           = "production"
 instance_type         = "t3.small"
 ec2_key_pair_name     = "apoflow-key"
-mailersend_token      = "mlsn.SEU_TOKEN_AQUI"
-mailersend_from       = "no-reply@seudominio.com"
+brevo_api_key         = "xkeysib-SUA_CHAVE_AQUI"
+brevo_from            = "no-reply@seudominio.com"
 jwt_secret            = "uma-chave-com-pelo-menos-32-caracteres"
 apoflow_site_address  = "apoflow.seudominio.com"
 apoflow_tls_mode      = "public"
@@ -584,8 +584,8 @@ docker compose logs -f proxy apoflow
 ```env
 MONGODB_URI=mongodb://mongodb:27017/apoflow
 EMAIL_ENABLED=true
-MAILERSEND_TOKEN=mlsn.SEU_TOKEN_AQUI
-MAILERSEND_FROM=no-reply@seudominio.com
+BREVO_API_KEY=xkeysib-SUA_CHAVE_AQUI
+BREVO_FROM=no-reply@seudominio.com
 JWT_SECRET=sua-chave-super-segura-com-32-caracteres-ou-mais
 APOFLOW_SITE_ADDRESS=localhost
 APOFLOW_TLS_MODE=internal
@@ -597,8 +597,8 @@ TLS_EMAIL=
 ```env
 MONGODB_URI=mongodb://mongodb:27017/apoflow
 EMAIL_ENABLED=true
-MAILERSEND_TOKEN=mlsn.SEU_TOKEN_AQUI
-MAILERSEND_FROM=no-reply@seudominio.com
+BREVO_API_KEY=xkeysib-SUA_CHAVE_AQUI
+BREVO_FROM=no-reply@seudominio.com
 JWT_SECRET=sua-chave-super-segura-com-32-caracteres-ou-mais
 APOFLOW_SITE_ADDRESS=3.91.10.20
 APOFLOW_TLS_MODE=internal
@@ -610,8 +610,8 @@ TLS_EMAIL=
 ```env
 MONGODB_URI=mongodb://mongodb:27017/apoflow
 EMAIL_ENABLED=true
-MAILERSEND_TOKEN=mlsn.SEU_TOKEN_AQUI
-MAILERSEND_FROM=no-reply@seudominio.com
+BREVO_API_KEY=xkeysib-SUA_CHAVE_AQUI
+BREVO_FROM=no-reply@seudominio.com
 JWT_SECRET=sua-chave-super-segura-com-32-caracteres-ou-mais
 APOFLOW_SITE_ADDRESS=apoflow.seudominio.com
 APOFLOW_TLS_MODE=public
