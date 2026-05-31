@@ -10,6 +10,7 @@ import com.apoflow.backend.domain.Apo;
 import com.apoflow.backend.domain.ApoAttachment;
 import com.apoflow.backend.domain.ApoStatus;
 import com.apoflow.backend.domain.ApoVote;
+import com.apoflow.backend.domain.CoordenacaoEntrada;
 import com.apoflow.backend.domain.Student;
 import com.apoflow.backend.domain.VoteDecision;
 import com.apoflow.backend.repository.ApoRepository;
@@ -112,6 +113,7 @@ public class ApoService {
 
         applyRequestData(apo, request);
         apo.getVotos().clear();
+        apo.setCoordenacaoEntrada(null);
         apo.setStatus(ApoStatus.EM_AVALIACAO_ORIENTADOR);
         apo.setDataAtualizacao(LocalDate.now());
 
@@ -171,11 +173,21 @@ public class ApoService {
         apo.getVotos().add(new ApoVote(membro, decision, justificativa));
         apo.setDataAtualizacao(LocalDate.now());
 
-        if (decision == VoteDecision.DEVOLVER) {
-            apo.setStatus(ApoStatus.EM_AVALIACAO_ORIENTADOR);
-        } else if (apo.getVotos().stream().filter(v -> v.getDecisao() == VoteDecision.APROVAR).count() >= 2) {
+        long aprovacoes = apo.getVotos().stream().filter(v -> v.getDecisao() == VoteDecision.APROVAR).count();
+        long reprovacoes = apo.getVotos().stream().filter(v -> v.getDecisao() == VoteDecision.REPROVAR).count();
+        long devolucoes = apo.getVotos().stream().filter(v -> v.getDecisao() == VoteDecision.DEVOLVER).count();
+
+        if (aprovacoes >= 3) {
+            apo.setCoordenacaoEntrada(CoordenacaoEntrada.PADRAO);
             apo.setStatus(ApoStatus.EM_AVALIACAO_COORDENACAO);
             notificationService.create(id("noti"), "APO \"" + apo.getTitulo() + "\" encaminhada para a coordenacao", "Agora mesmo", false, "coordenacao");
+        } else if (devolucoes >= 3) {
+            apo.setCoordenacaoEntrada(null);
+            apo.setStatus(ApoStatus.EM_AVALIACAO_ORIENTADOR);
+        } else if (aprovacoes >= 1 && reprovacoes >= 1 && devolucoes >= 1) {
+            apo.setCoordenacaoEntrada(CoordenacaoEntrada.EMPATE);
+            apo.setStatus(ApoStatus.EM_AVALIACAO_COORDENACAO);
+            notificationService.create(id("noti"), "APO \"" + apo.getTitulo() + "\" encaminhada para desempate da coordenacao", "Agora mesmo", false, "coordenacao");
         }
 
         return map(apoRepository.save(apo));
@@ -212,6 +224,10 @@ public class ApoService {
     @Transactional
     public ApoResponse launch(String apoId) {
         Apo apo = getEntity(apoId);
+        if (apo.getStatus() != ApoStatus.LANCADO) {
+            int pontos = apo.getPontos() != null ? apo.getPontos() : 0;
+            studentService.increasePoints(apo.getAlunoId(), pontos);
+        }
         apo.setStatus(ApoStatus.LANCADO);
         apo.setDataAtualizacao(LocalDate.now());
         notificationService.create(id("noti"), "Credito da APO \"" + apo.getTitulo() + "\" lancado no sistema academico", "Agora mesmo", false, "aluno");
@@ -234,6 +250,7 @@ public class ApoService {
                 apo.getAluno(),
                 apo.getOrientadorId(),
                 apo.getStatus().name().toLowerCase(),
+                apo.getCoordenacaoEntrada() == null ? null : apo.getCoordenacaoEntrada().name().toLowerCase(),
                 apo.getAnexos().stream().map(ApoAttachment::getNomeArquivo).toList(),
                 apo.getDataAtualizacao().format(DATE_FORMATTER),
                 apo.getVotos().stream()

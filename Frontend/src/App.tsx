@@ -8,10 +8,19 @@ import DashboardRouter from '@/pages/DashboardRouter';
 import NovaAPORoute from '@/pages/NovaAPORoute';
 import MinhasAPOs from '@/pages/MinhasAPOs';
 import Pendencias from '@/pages/Pendencias';
+import OrientadorAvaliadas from '@/pages/OrientadorAvaliadas';
+import OrientadorAlunos from '@/pages/OrientadorAlunos';
 import Votacao from '@/pages/Votacao';
+import ComissaoItensAprovados from '@/pages/ComissaoItensAprovados';
+import ComissaoItensDevolvidos from '@/pages/ComissaoItensDevolvidos';
 import AvaliacaoFinal from '@/pages/AvaliacaoFinal';
+import CoordenacaoAprovados from '@/pages/CoordenacaoAprovados';
+import CoordenacaoEmpatesResolvidos from '@/pages/CoordenacaoEmpatesResolvidos';
 import AdminUsersRoute from '@/pages/AdminUsersRoute';
 import Lancamento from '@/pages/Lancamento';
+import SecretariaFilaArquivamento from '@/pages/SecretariaFilaArquivamento';
+import SecretariaAposLancadas from '@/pages/SecretariaAposLancadas';
+import SecretariaAlunos from '@/pages/SecretariaAlunos';
 import NotificacoesRoute from '@/pages/NotificacoesRoute';
 import NotFound from '@/pages/NotFound';
 import ChangePasswordRoute from '@/pages/ChangePasswordRoute';
@@ -36,9 +45,18 @@ const App = () => (
             <Route path="/nova-apo" element={<NovaAPORoute />} />
             <Route path="/minhas-apos" element={<MinhasAPOs />} />
             <Route path="/pendencias" element={<Pendencias />} />
+            <Route path="/avaliadas-orientador" element={<OrientadorAvaliadas />} />
+            <Route path="/alunos-orientador" element={<OrientadorAlunos />} />
             <Route path="/votacao" element={<Votacao />} />
+            <Route path="/itens-aprovados-comissao" element={<ComissaoItensAprovados />} />
+            <Route path="/itens-devolvidos-comissao" element={<ComissaoItensDevolvidos />} />
             <Route path="/avaliacao-final" element={<AvaliacaoFinal />} />
+            <Route path="/aprovados-coordenacao" element={<CoordenacaoAprovados />} />
+            <Route path="/empates-resolvidos" element={<CoordenacaoEmpatesResolvidos />} />
+            <Route path="/fila-arquivamento" element={<SecretariaFilaArquivamento />} />
             <Route path="/lancamento" element={<Lancamento />} />
+            <Route path="/apos-lancadas" element={<SecretariaAposLancadas />} />
+            <Route path="/alunos-secretaria" element={<SecretariaAlunos />} />
             <Route path="/usuarios" element={<AdminUsersRoute />} />
             <Route path="/notificacoes" element={<NotificacoesRoute />} />
             <Route path="/perfil" element={<PerfilRoute />} />

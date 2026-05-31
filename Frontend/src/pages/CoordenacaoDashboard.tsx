@@ -14,6 +14,12 @@ import { toast } from 'sonner';
 export default function CoordenacaoDashboard() {
   const { data: apos = [] } = useQuery({ queryKey: queryKeys.apos, queryFn: getApos });
   const itens = apos.filter((entry) => entry.status === 'em_avaliacao_coordenacao');
+  const empates = itens.filter((entry) => entry.coordenacaoEntrada === 'empate');
+  const aprovacaoPadrao = itens.filter((entry) => entry.coordenacaoEntrada !== 'empate');
+  const aprovados = apos.filter((entry) => entry.status === 'aprovado').length;
+  const empatesResolvidos = apos.filter((entry) =>
+    entry.coordenacaoEntrada === 'empate' && entry.status !== 'em_avaliacao_coordenacao'
+  ).length;
 
   return (
     <div className="max-w-5xl space-y-6">
@@ -32,25 +38,47 @@ export default function CoordenacaoDashboard() {
         <Card className="shadow-card">
           <CardContent className="flex items-center gap-3 p-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-success"><FileCheck className="h-5 w-5" /></div>
-            <div><p className="font-body text-xs text-muted-foreground">Aprovados (total)</p><p className="text-xl font-display font-bold">12</p></div>
+            <div><p className="font-body text-xs text-muted-foreground">Aprovados (total)</p><p className="text-xl font-display font-bold">{aprovados}</p></div>
           </CardContent>
         </Card>
         <Card className="shadow-card">
           <CardContent className="flex items-center gap-3 p-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-info"><AlertTriangle className="h-5 w-5" /></div>
-            <div><p className="font-body text-xs text-muted-foreground">Empates Resolvidos</p><p className="text-xl font-display font-bold">2</p></div>
+            <div><p className="font-body text-xs text-muted-foreground">Empates Resolvidos</p><p className="text-xl font-display font-bold">{empatesResolvidos}</p></div>
           </CardContent>
         </Card>
       </div>
 
-      {itens.map((apo, index) => (
-        <motion.div key={apo.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
-          <DecisaoCard apo={apo} />
-        </motion.div>
-      ))}
-      {itens.length === 0 && (
+      <CoordenacaoSection title="Empates" emptyMessage="Nenhum empate aguardando decisão.">
+        {empates.map((apo, index) => (
+          <motion.div key={apo.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
+            <DecisaoCard apo={apo} />
+          </motion.div>
+        ))}
+      </CoordenacaoSection>
+
+      <CoordenacaoSection title="Aprovação padrão" emptyMessage="Nenhuma APO em aprovação padrão.">
+        {aprovacaoPadrao.map((apo, index) => (
+          <motion.div key={apo.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
+            <DecisaoCard apo={apo} />
+          </motion.div>
+        ))}
+      </CoordenacaoSection>
+
+    </div>
+  );
+}
+
+function CoordenacaoSection({ title, emptyMessage, children }: { title: string; emptyMessage: string; children: React.ReactNode }) {
+  const items = Array.isArray(children) ? children.filter(Boolean) : children;
+  const hasItems = Array.isArray(items) ? items.length > 0 : Boolean(items);
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-display font-semibold">{title}</h2>
+      {hasItems ? items : (
         <Card className="shadow-card">
-          <CardContent className="p-8 text-center font-body text-muted-foreground">Nenhum item pendente.</CardContent>
+          <CardContent className="p-6 text-center font-body text-sm text-muted-foreground">{emptyMessage}</CardContent>
         </Card>
       )}
     </div>

@@ -36,6 +36,13 @@ export default function MinhasAPOs() {
   const apos = allApos.filter((entry) => entry.alunoId === user.id);
   const rascunhos = apos.filter((entry) => entry.status === 'rascunho');
   const enviadas = apos.filter((entry) => entry.status !== 'rascunho' && entry.status !== 'desistida');
+  const desistidas = apos.filter((entry) => entry.status === 'desistida');
+  const pendentes = enviadas.filter((entry) =>
+    ['devolvida', 'em_avaliacao_orientador', 'em_avaliacao_comissao', 'em_avaliacao_coordenacao'].includes(entry.status)
+  );
+  const aprovadas = enviadas.filter((entry) => entry.status === 'aprovado');
+  const arquivadas = enviadas.filter((entry) => entry.status === 'arquivado');
+  const lancadas = enviadas.filter((entry) => entry.status === 'lancado');
   const pontosTotais = enviadas.reduce((total, current) => total + current.pontos, 0);
 
   return (
@@ -79,32 +86,66 @@ export default function MinhasAPOs() {
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-card">
-          <CardContent className="p-0">
-            <div className="border-b px-6 py-4">
-              <h2 className="font-display text-base font-semibold">APOs enviadas</h2>
-            </div>
-            <div className="divide-y">
-              {enviadas.map((apo) => (
-                <ApoItem key={apo.id} apo={apo}>
-                  {apo.status === 'devolvida' && (
-                    <>
-                      <Button size="sm" variant="outline" onClick={() => navigate(`/nova-apo?editar=${apo.id}`)}>
-                        Editar
-                      </Button>
-                      <Button size="sm" variant="outline" className="text-destructive" onClick={() => giveUpMutation.mutate(apo.id)}>
-                        Desistir
-                      </Button>
-                    </>
-                  )}
-                </ApoItem>
-              ))}
-              {enviadas.length === 0 && <div className="p-8 text-center font-body text-muted-foreground">Nenhuma APO enviada.</div>}
-            </div>
-          </CardContent>
-        </Card>
+        <ApoSection title="APOs pendentes" emptyMessage="Nenhuma APO pendente.">
+          {pendentes.map((apo) => (
+            <ApoItem key={apo.id} apo={apo}>
+              {apo.status === 'devolvida' && (
+                <>
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/nova-apo?editar=${apo.id}`)}>
+                    Editar
+                  </Button>
+                  <Button size="sm" variant="outline" className="text-destructive" onClick={() => giveUpMutation.mutate(apo.id)}>
+                    Desistir
+                  </Button>
+                </>
+              )}
+            </ApoItem>
+          ))}
+        </ApoSection>
+
+        <ApoSection title="APOs aprovadas" emptyMessage="Nenhuma APO aprovada.">
+          {aprovadas.map((apo) => (
+            <ApoItem key={apo.id} apo={apo} />
+          ))}
+        </ApoSection>
+
+        <ApoSection title="APOs arquivadas" emptyMessage="Nenhuma APO arquivada.">
+          {arquivadas.map((apo) => (
+            <ApoItem key={apo.id} apo={apo} />
+          ))}
+        </ApoSection>
+
+        <ApoSection title="APOs lançadas" emptyMessage="Nenhuma APO lançada.">
+          {lancadas.map((apo) => (
+            <ApoItem key={apo.id} apo={apo} />
+          ))}
+        </ApoSection>
+
+        <ApoSection title="APOs desistidas" emptyMessage="Nenhuma APO desistida.">
+          {desistidas.map((apo) => (
+            <ApoItem key={apo.id} apo={apo} />
+          ))}
+        </ApoSection>
       </div>
     </AppLayout>
+  );
+}
+
+function ApoSection({ title, emptyMessage, children }: { title: string; emptyMessage: string; children: React.ReactNode }) {
+  const items = Array.isArray(children) ? children.filter(Boolean) : children;
+  const hasItems = Array.isArray(items) ? items.length > 0 : Boolean(items);
+
+  return (
+    <Card className="shadow-card">
+      <CardContent className="p-0">
+        <div className="border-b px-6 py-4">
+          <h2 className="font-display text-base font-semibold">{title}</h2>
+        </div>
+        <div className="divide-y">
+          {hasItems ? items : <div className="p-8 text-center font-body text-sm text-muted-foreground">{emptyMessage}</div>}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

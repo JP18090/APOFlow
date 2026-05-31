@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 
 export default function LoginPage() {
-  const { login, verifyOtp, pendingOtpEmail, isAuthenticating } = useAuth();
+  const { login, verifyOtp, cancelOtp, pendingOtpEmail, isAuthenticating } = useAuth();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [otpCode, setOtpCode] = useState('');
@@ -34,6 +34,11 @@ export default function LoginPage() {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Código inválido.');
     }
+  };
+
+  const handleCancelOtp = () => {
+    cancelOtp();
+    setOtpCode('');
   };
 
   return (
@@ -103,9 +108,14 @@ export default function LoginPage() {
                         autoFocus
                       />
                     </div>
-                    <Button type="submit" className="w-full bg-gradient-accent font-display font-semibold text-accent-foreground" disabled={isAuthenticating || otpCode.length !== 6}>
-                      {isAuthenticating ? 'Verificando...' : 'Confirmar'}
-                    </Button>
+                    <div className="flex gap-3">
+                      <Button type="button" variant="outline" className="flex-1" onClick={handleCancelOtp}>
+                        Voltar
+                      </Button>
+                      <Button type="submit" className="flex-1 bg-gradient-accent font-display font-semibold text-accent-foreground" disabled={isAuthenticating || otpCode.length !== 6}>
+                        {isAuthenticating ? 'Verificando...' : 'Confirmar'}
+                      </Button>
+                    </div>
                   </form>
                   <p className="mt-3 text-center font-body text-xs text-muted-foreground">
                     O código expira em 10 minutos.{' '}

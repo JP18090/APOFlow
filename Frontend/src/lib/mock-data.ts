@@ -45,6 +45,7 @@ export interface APORecord {
   aluno: string;
   orientadorId: string;
   status: APOStatus;
+  coordenacaoEntrada?: 'padrao' | 'empate' | null;
   anexos: string[];
   dataAtualizacao: string;
   votos?: APOVote[];

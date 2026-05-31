@@ -7,6 +7,7 @@ interface AuthContextValue {
   pendingOtpEmail: string | null;
   login: (email: string, senha: string) => Promise<void>;
   verifyOtp: (code: string) => Promise<void>;
+  cancelOtp: () => void;
   switchProfessorRole: (role: Role) => void;
   logout: () => void;
   isAuthenticating: boolean;
@@ -73,6 +74,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } finally {
           setIsAuthenticating(false);
         }
+      },
+      cancelOtp: () => {
+        setPendingOtpEmail(null);
       },
       switchProfessorRole: (role) => {
         if (!user) return;

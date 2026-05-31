@@ -29,6 +29,8 @@ public class Apo {
 
     private ApoStatus status;
 
+    private CoordenacaoEntrada coordenacaoEntrada;
+
     private LocalDate dataAtualizacao;
 
     private List<ApoAttachment> anexos = new ArrayList<>();
@@ -108,6 +110,14 @@ public class Apo {
 
     public void setStatus(ApoStatus status) {
         this.status = status;
+    }
+
+    public CoordenacaoEntrada getCoordenacaoEntrada() {
+        return coordenacaoEntrada;
+    }
+
+    public void setCoordenacaoEntrada(CoordenacaoEntrada coordenacaoEntrada) {
+        this.coordenacaoEntrada = coordenacaoEntrada;
     }
 
     public LocalDate getDataAtualizacao() {

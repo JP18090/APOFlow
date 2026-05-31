@@ -37,6 +37,15 @@ public class NotificationService {
         sendEmailToRecipient(recipient, title);
     }
 
+    public void markAllAsRead(String recipient) {
+        notificationRepository.findByDestinatarioIn(List.of(recipient, "all")).stream()
+                .filter(notification -> !notification.isLida())
+                .forEach(notification -> {
+                    notification.setLida(true);
+                    notificationRepository.save(notification);
+                });
+    }
+
     private void sendEmailToRecipient(String recipient, String title) {
         try {
             Role role = Role.valueOf(recipient.toUpperCase());

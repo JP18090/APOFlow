@@ -12,6 +12,7 @@ public record ApoResponse(
         String aluno,
         String orientadorId,
         String status,
+        String coordenacaoEntrada,
         List<String> anexos,
         String dataAtualizacao,
         List<ApoVoteResponse> votos

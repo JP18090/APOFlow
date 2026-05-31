@@ -137,6 +137,13 @@ export function getNotifications(recipient: string) {
   return request<NotificationItem[]>(`/notifications?recipient=${encodeURIComponent(recipient)}`);
 }
 
+export function markNotificationsAsRead(recipient: string) {
+  return request<void>('/notifications/read', {
+    method: 'POST',
+    body: JSON.stringify({ recipient }),
+  });
+}
+
 export function createApo(payload: {
   alunoId: string;
   titulo: string;
