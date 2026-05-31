@@ -8,6 +8,8 @@ public record AdminUserResponse(
         String email,
         String papel,
         List<String> papeis,
-        String drt
+        String drt,
+        String orientadorId,
+        String orientadorNome
 ) {
 }

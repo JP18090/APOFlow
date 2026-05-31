@@ -42,37 +42,41 @@ function getNextRoles(current: Role[], role: Role): Role[] {
   }
 
   if (role === 'coordenacao') {
-    return normalized.includes('coordenacao') ? ['aluno'] : ['coordenacao'];
+    if (normalized.includes('coordenacao')) {
+      return normalized.includes('orientador') ? ['orientador'] : ['aluno'];
+    }
+
+    if (normalized.includes('orientador')) {
+      return ['orientador', 'coordenacao'];
+    }
+
+    return ['coordenacao'];
   }
 
   if (role === 'orientador') {
     if (normalized.includes('orientador')) {
-      return normalized.includes('comissao') ? ['comissao'] : ['aluno'];
+      return normalized.includes('coordenacao') ? ['coordenacao'] : ['aluno'];
     }
 
-    if (normalized.includes('comissao')) {
-      return ['orientador', 'comissao'];
+    if (normalized.includes('coordenacao')) {
+      return ['orientador', 'coordenacao'];
     }
 
     return ['orientador'];
   }
 
-  if (normalized.includes('comissao')) {
-    return normalized.includes('orientador') ? ['orientador'] : ['aluno'];
+  if (role === 'comissao') {
+    return normalized.includes('comissao') ? ['aluno'] : ['comissao'];
   }
 
-  if (normalized.includes('orientador')) {
-    return ['orientador', 'comissao'];
-  }
-
-  return ['comissao'];
+  return ['aluno'];
 }
 
 function getRoleSummary(roles: Role[]): string {
   const normalized = roles.filter((role) => role !== 'admin');
 
-  if (normalized.includes('orientador') && normalized.includes('comissao')) {
-    return 'Orientador e Comissão';
+  if (normalized.includes('orientador') && normalized.includes('coordenacao')) {
+    return 'Orientador e Coordenação';
   }
 
   return roleLabels[normalized[0] ?? 'aluno'];
@@ -82,6 +86,7 @@ export default function AdminUsersPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [draftRoles, setDraftRoles] = useState<Record<string, Role[]>>({});
+  const [draftOrientadores, setDraftOrientadores] = useState<Record<string, string>>({});
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<'todos' | Role>('todos');
 
@@ -92,7 +97,7 @@ export default function AdminUsersPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ userId, papeis }: { userId: string; papeis: Role[] }) => updateUserRoles(userId, papeis),
+    mutationFn: ({ userId, papeis, orientadorId }: { userId: string; papeis: Role[]; orientadorId?: string | null }) => updateUserRoles(userId, papeis, orientadorId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users });
       toast.success('Perfis atualizados com sucesso.');
@@ -137,6 +142,8 @@ export default function AdminUsersPage() {
   }
 
   const resolveRoles = (entry: AdminUser) => draftRoles[entry.id] ?? entry.papeis;
+  const resolveOrientadorId = (entry: AdminUser) => draftOrientadores[entry.id] ?? entry.orientadorId ?? '';
+  const orientadoresDisponiveis = users.filter((entry) => entry.papeis.includes('orientador'));
 
   const toggleRole = (entry: AdminUser, role: Role) => {
     setDraftRoles((prev) => ({
@@ -151,7 +158,8 @@ export default function AdminUsersPage() {
       toast.error('Selecione ao menos um perfil.');
       return;
     }
-    updateMutation.mutate({ userId: entry.id, papeis });
+    const orientadorId = papeis.includes('aluno') ? resolveOrientadorId(entry) || null : null;
+    updateMutation.mutate({ userId: entry.id, papeis, orientadorId });
   };
 
   const removeUser = (entry: AdminUser) => {
@@ -244,10 +252,29 @@ export default function AdminUsersPage() {
                   )}
                 </div>
 
+                {!isFixedAdmin && selectedRoles.includes('aluno') && (
+                  <div className="max-w-md space-y-1.5">
+                    <p className="font-display text-sm font-semibold text-foreground">Orientador</p>
+                    <select
+                      className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      value={resolveOrientadorId(entry)}
+                      onChange={(event) => setDraftOrientadores((prev) => ({ ...prev, [entry.id]: event.target.value }))}
+                    >
+                      <option value="">Sem orientador definido</option>
+                      {orientadoresDisponiveis.map((orientador) => (
+                        <option key={orientador.id} value={orientador.id}>{orientador.nome}</option>
+                      ))}
+                    </select>
+                    <p className="font-body text-xs text-muted-foreground">
+                      O aluno terá apenas um orientador. Orientadores podem acompanhar múltiplos alunos.
+                    </p>
+                  </div>
+                )}
+
                 {!isFixedAdmin && (
                   <div className="flex items-center justify-between gap-3">
                     <p className="font-body text-xs text-muted-foreground">
-                      Estados permitidos: aluno, orientador, comissão, orientador com comissão, coordenação ou secretaria.
+                      Estados permitidos: aluno, orientador, comissão, orientador com coordenação, coordenação ou secretaria.
                     </p>
                     <div className="flex items-center gap-2">
                       <Button

@@ -7,45 +7,54 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { approveByOrientador, getApos, queryKeys, returnByOrientador } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
+import { approveByOrientador, getApos, getStudents, queryKeys, returnByOrientador } from '@/lib/api';
 import { APORecord } from '@/lib/mock-data';
 import { toast } from 'sonner';
 
-export default function OrientadorDashboard() {
+export default function OrientadorDashboard({ compact = false }: { compact?: boolean }) {
+  const { user } = useAuth();
   const { data: apos = [] } = useQuery({ queryKey: queryKeys.apos, queryFn: getApos });
-  const pendentes = apos.filter((entry) => entry.status === 'em_avaliacao_orientador');
-  const historico = apos.filter((entry) => entry.status !== 'em_avaliacao_orientador' && entry.status !== 'rascunho');
+  const { data: students = [] } = useQuery({ queryKey: queryKeys.students, queryFn: getStudents });
+  const aposDoOrientador = apos.filter((entry) => entry.orientadorId === user?.id);
+  const orientados = students.filter((entry) => entry.orientadorId === user?.id);
+  const pendentes = aposDoOrientador.filter((entry) => entry.status === 'em_avaliacao_orientador');
+  const historico = aposDoOrientador.filter((entry) => entry.status !== 'em_avaliacao_orientador' && entry.status !== 'rascunho');
 
   const stats = [
     { label: 'Pendentes', value: pendentes.length, icon: Clock, color: 'text-warning' },
     { label: 'Total Avaliadas', value: historico.length, icon: ClipboardList, color: 'text-primary' },
-    { label: 'Orientados Ativos', value: 3, icon: Users, color: 'text-accent' },
+    { label: 'Orientados Ativos', value: orientados.length, icon: Users, color: 'text-accent' },
   ];
 
   return (
     <div className="max-w-5xl space-y-6">
       <div>
-        <h1 className="text-2xl font-display font-bold">Painel do Orientador</h1>
-        <p className="font-body text-sm text-muted-foreground">Avalie as submissões dos seus orientados</p>
+        <h1 className="text-2xl font-display font-bold">{compact ? 'Pendências do Orientador' : 'Painel do Orientador'}</h1>
+        <p className="font-body text-sm text-muted-foreground">
+          {compact ? 'Submissões aguardando avaliação dos seus orientados' : 'Avalie as submissões dos seus orientados'}
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {stats.map((stat, index) => (
-          <motion.div key={stat.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
-            <Card className="shadow-card">
-              <CardContent className="flex items-center gap-3 p-4">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-secondary ${stat.color}`}>
-                  <stat.icon className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="font-body text-xs text-muted-foreground">{stat.label}</p>
-                  <p className="text-xl font-display font-bold">{stat.value}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
+      {!compact && (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {stats.map((stat, index) => (
+            <motion.div key={stat.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
+              <Card className="shadow-card">
+                <CardContent className="flex items-center gap-3 p-4">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-secondary ${stat.color}`}>
+                    <stat.icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="font-body text-xs text-muted-foreground">{stat.label}</p>
+                    <p className="text-xl font-display font-bold">{stat.value}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       <Card className="shadow-card">
         <CardHeader>

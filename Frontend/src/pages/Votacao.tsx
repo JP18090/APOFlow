@@ -12,7 +12,7 @@ export default function Votacao() {
 
   return (
     <AppLayout>
-      <ComissaoDashboard />
+      <ComissaoDashboard compact />
     </AppLayout>
   );
 }

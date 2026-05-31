@@ -102,7 +102,7 @@ export function AppSidebar() {
   }
 
   const items = navByRole[user.papel];
-  const availableProfessorRoles = user.papeis.filter((entry) => ['orientador', 'comissao', 'coordenacao'].includes(entry));
+  const availableProfessorRoles = user.papeis.filter((entry) => ['orientador', 'coordenacao'].includes(entry));
   const canSwitchProfessorRole = availableProfessorRoles.length > 1;
 
   const changeRole = (nextRole: Role) => {
@@ -154,7 +154,6 @@ export function AppSidebar() {
                   onChange={(event) => changeRole(event.target.value as Role)}
                 >
                   {availableProfessorRoles.includes('orientador') && <option value="orientador">Orientador</option>}
-                  {availableProfessorRoles.includes('comissao') && <option value="comissao">Comissão</option>}
                   {availableProfessorRoles.includes('coordenacao') && <option value="coordenacao">Coordenação</option>}
                 </select>
               </div>

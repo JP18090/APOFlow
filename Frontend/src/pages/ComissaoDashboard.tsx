@@ -13,7 +13,7 @@ import { getApos, queryKeys, voteApo } from '@/lib/api';
 import { APORecord } from '@/lib/mock-data';
 import { toast } from 'sonner';
 
-export default function ComissaoDashboard() {
+export default function ComissaoDashboard({ compact = false }: { compact?: boolean }) {
   const { user } = useAuth();
   const { data: apos = [] } = useQuery({ queryKey: queryKeys.apos, queryFn: getApos });
   const itens = apos.filter((entry) => entry.status === 'em_avaliacao_comissao');
@@ -21,30 +21,34 @@ export default function ComissaoDashboard() {
   return (
     <div className="max-w-5xl space-y-6">
       <div>
-        <h1 className="text-2xl font-display font-bold">Painel da Comissão</h1>
-        <p className="font-body text-sm text-muted-foreground">Itens para avaliação e votação</p>
+        <h1 className="text-2xl font-display font-bold">{compact ? 'Itens para Votação' : 'Painel da Comissão'}</h1>
+        <p className="font-body text-sm text-muted-foreground">
+          {compact ? 'APOs aguardando seu voto na comissão' : 'Itens para avaliação e votação'}
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Card className="shadow-card">
-          <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-warning"><Vote className="h-5 w-5" /></div>
-            <div><p className="font-body text-xs text-muted-foreground">Aguardando Voto</p><p className="text-xl font-display font-bold">{itens.length}</p></div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-card">
-          <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-success"><ThumbsUp className="h-5 w-5" /></div>
-            <div><p className="font-body text-xs text-muted-foreground">Aprovados (mês)</p><p className="text-xl font-display font-bold">5</p></div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-card">
-          <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-destructive"><ThumbsDown className="h-5 w-5" /></div>
-            <div><p className="font-body text-xs text-muted-foreground">Devolvidos</p><p className="text-xl font-display font-bold">1</p></div>
-          </CardContent>
-        </Card>
-      </div>
+      {!compact && (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <Card className="shadow-card">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-warning"><Vote className="h-5 w-5" /></div>
+              <div><p className="font-body text-xs text-muted-foreground">Aguardando Voto</p><p className="text-xl font-display font-bold">{itens.length}</p></div>
+            </CardContent>
+          </Card>
+          <Card className="shadow-card">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-success"><ThumbsUp className="h-5 w-5" /></div>
+              <div><p className="font-body text-xs text-muted-foreground">Aprovados (mês)</p><p className="text-xl font-display font-bold">5</p></div>
+            </CardContent>
+          </Card>
+          <Card className="shadow-card">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-destructive"><ThumbsDown className="h-5 w-5" /></div>
+              <div><p className="font-body text-xs text-muted-foreground">Devolvidos</p><p className="text-xl font-display font-bold">1</p></div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <div className="space-y-4">
         {itens.map((apo, index) => (

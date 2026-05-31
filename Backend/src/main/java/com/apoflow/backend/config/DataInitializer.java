@@ -67,7 +67,7 @@ public class DataInitializer {
             orientador.setEmail("10437996@mackenzista.com.br");
             orientador.setSenhaHash(passwordEncoder.encode(resolveSeedPassword("SEED_ORIENTADOR_PASSWORD", "GustavoNeto123@")));
             orientador.setPapel(Role.ORIENTADOR);
-            orientador.setPapeis(List.of(Role.ORIENTADOR, Role.COMISSAO, Role.COORDENACAO));
+            orientador.setPapeis(List.of(Role.ORIENTADOR, Role.COORDENACAO));
             orientador.setPrimeiroAcesso(true);
             orientador.setRequerMudancaSenha(true);
             orientador.setHabilitado(true);

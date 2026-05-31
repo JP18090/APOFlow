@@ -83,16 +83,12 @@ function AlunoOrientadoCard({ aluno, apos }: { aluno: AlunoResumo; apos: APOReco
 }
 
 function getAposDoOrientador(apos: APORecord[], orientadorId: string) {
-  const vinculadas = apos.filter((entry) => entry.orientadorId === orientadorId);
-  return vinculadas.length > 0 ? vinculadas : apos;
+  return apos.filter((entry) => entry.orientadorId === orientadorId);
 }
 
 function getAlunosDoOrientador(students: AlunoResumo[], apos: APORecord[], orientadorId: string) {
   const vinculados = students.filter((entry) => entry.orientadorId === orientadorId);
-  if (vinculados.length > 0) {
-    return vinculados;
-  }
-
   const alunoIdsComApo = new Set(apos.map((entry) => entry.alunoId));
-  return students.filter((entry) => alunoIdsComApo.has(entry.id));
+  const mergedIds = new Set([...vinculados.map((entry) => entry.id), ...alunoIdsComApo]);
+  return students.filter((entry) => mergedIds.has(entry.id));
 }

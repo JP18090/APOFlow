@@ -13,7 +13,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const recipient = user ? getNotificationRecipient(user.papel) : 'aluno';
+  const recipient = user ? (user.papel === 'orientador' ? user.id : getNotificationRecipient(user.papel)) : 'aluno';
   const queryClient = useQueryClient();
   const { data: notifications = [] } = useQuery({
     queryKey: queryKeys.notifications(recipient),

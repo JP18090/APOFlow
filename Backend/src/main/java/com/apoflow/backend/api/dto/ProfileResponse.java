@@ -10,6 +10,8 @@ public record ProfileResponse(
         List<String> papeis,
         String fotoUrl,
         String periodo,
-        String drt
+        String drt,
+        String orientadorId,
+        String orientadorNome
 ) {
 }

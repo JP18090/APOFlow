@@ -81,6 +81,5 @@ function ApoAvaliadaItem({ apo }: { apo: APORecord }) {
 }
 
 function getAposDoOrientador(apos: APORecord[], orientadorId: string) {
-  const vinculadas = apos.filter((entry) => entry.orientadorId === orientadorId);
-  return vinculadas.length > 0 ? vinculadas : apos;
+  return apos.filter((entry) => entry.orientadorId === orientadorId);
 }

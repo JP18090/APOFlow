@@ -8,6 +8,8 @@ import com.apoflow.backend.api.dto.VoteRequest;
 import com.apoflow.backend.service.ApoService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,8 +33,8 @@ public class ApoController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public List<ApoResponse> findAll() {
-        return apoService.findAll();
+    public List<ApoResponse> findAll(@AuthenticationPrincipal UserDetails principal) {
+        return apoService.findVisibleFor(principal.getUsername());
     }
 
     @PostMapping
@@ -61,14 +63,14 @@ public class ApoController {
 
     @PostMapping("/{apoId}/orientador/aprovar")
     @PreAuthorize("hasRole('ORIENTADOR')")
-    public ApoResponse approveByOrientador(@PathVariable String apoId) {
-        return apoService.approveByOrientador(apoId);
+    public ApoResponse approveByOrientador(@PathVariable String apoId, @AuthenticationPrincipal UserDetails principal) {
+        return apoService.approveByOrientador(apoId, principal.getUsername());
     }
 
     @PostMapping("/{apoId}/orientador/devolver")
     @PreAuthorize("hasRole('ORIENTADOR')")
-    public ApoResponse returnByOrientador(@PathVariable String apoId, @Valid @RequestBody DecisionRequest request) {
-        return apoService.returnByOrientador(apoId, request);
+    public ApoResponse returnByOrientador(@PathVariable String apoId, @Valid @RequestBody DecisionRequest request, @AuthenticationPrincipal UserDetails principal) {
+        return apoService.returnByOrientador(apoId, request, principal.getUsername());
     }
 
     @PostMapping("/{apoId}/comissao/voto")

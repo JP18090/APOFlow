@@ -35,7 +35,7 @@ public class UserController {
             Set.of(Role.SECRETARIA),
             Set.of(Role.COMISSAO),
             Set.of(Role.ORIENTADOR),
-            Set.of(Role.ORIENTADOR, Role.COMISSAO),
+            Set.of(Role.ORIENTADOR, Role.COORDENACAO),
             Set.of(Role.COORDENACAO)
     );
 
@@ -112,7 +112,7 @@ public class UserController {
         user.setPapel(roles.get(0));
         user.setAtualizadoEm(LocalDateTime.now());
         userRepository.save(user);
-        syncStudentRecord(user);
+        syncStudentRecord(user, request.orientadorId());
 
         return toAdminResponse(user);
     }
@@ -149,18 +149,23 @@ public class UserController {
                 roleNames(user),
                 user.getFotoUrl(),
                 user.getPeriodo(),
-                user.getDrt()
+                user.getDrt(),
+                getStudentOrientadorId(user),
+                getStudentOrientadorNome(user)
         );
     }
 
     private AdminUserResponse toAdminResponse(AppUser user) {
+        String orientadorId = getStudentOrientadorId(user);
         return new AdminUserResponse(
                 user.getId(),
                 user.getNome(),
                 user.getEmail(),
                 user.getPapel().name().toLowerCase(),
                 roleNames(user),
-                user.getDrt()
+                user.getDrt(),
+                orientadorId,
+                getOrientadorNome(orientadorId)
         );
     }
 
@@ -195,13 +200,13 @@ public class UserController {
             throw new IllegalArgumentException("Informe ao menos um perfil.");
         }
         if (!ALLOWED_ROLE_COMBINATIONS.contains(Set.copyOf(roles))) {
-            throw new IllegalArgumentException("Combinação de perfis inválida. Estados permitidos: aluno, orientador, comissão, orientador com comissão, coordenação ou secretaria.");
+            throw new IllegalArgumentException("Combinação de perfis inválida. Estados permitidos: aluno, orientador, comissão, orientador com coordenação, coordenação ou secretaria.");
         }
 
         return new ArrayList<>(roles);
     }
 
-    private void syncStudentRecord(AppUser user) {
+    private void syncStudentRecord(AppUser user, String orientadorId) {
         String userId = requireUserId(user);
         boolean isAluno = roleNames(user).contains(Role.ALUNO.name().toLowerCase());
         if (!isAluno) {
@@ -209,13 +214,68 @@ public class UserController {
             return;
         }
 
+        String normalizedOrientadorId = normalizeOrientadorId(orientadorId);
         Student student = studentRepository.findById(Objects.requireNonNull(userId))
                 .orElse(new Student(userId, user.getNome(), null, 0));
         student.setNome(user.getNome());
+        student.setOrientadorId(normalizedOrientadorId);
         if (student.getPontosAcumulados() == null) {
             student.setPontosAcumulados(0);
         }
         studentRepository.save(student);
+
+        apoRepository.findByAlunoId(userId).forEach(apo -> {
+            apo.setOrientadorId(normalizedOrientadorId);
+            apoRepository.save(apo);
+        });
+    }
+
+    private String normalizeOrientadorId(String orientadorId) {
+        if (orientadorId == null || orientadorId.isBlank()) {
+            return null;
+        }
+
+        AppUser orientador = userRepository.findById(orientadorId)
+                .orElseThrow(() -> new IllegalArgumentException("Orientador não encontrado."));
+
+        List<Role> orientadorRoles = (orientador.getPapeis() != null && !orientador.getPapeis().isEmpty())
+                ? orientador.getPapeis()
+                : List.of(orientador.getPapel());
+
+        if (!orientadorRoles.contains(Role.ORIENTADOR)) {
+            throw new IllegalArgumentException("Usuário selecionado não possui perfil de orientador.");
+        }
+
+        return orientador.getId();
+    }
+
+    private String getStudentOrientadorId(AppUser user) {
+        if (!roleNames(user).contains(Role.ALUNO.name().toLowerCase())) {
+            return null;
+        }
+
+        String userId = user.getId();
+        if (userId == null || userId.isBlank()) {
+            return null;
+        }
+
+        return studentRepository.findById(userId)
+                .map(Student::getOrientadorId)
+                .orElse(null);
+    }
+
+    private String getStudentOrientadorNome(AppUser user) {
+        return getOrientadorNome(getStudentOrientadorId(user));
+    }
+
+    private String getOrientadorNome(String orientadorId) {
+        if (orientadorId == null || orientadorId.isBlank()) {
+            return null;
+        }
+
+        return userRepository.findById(orientadorId)
+                .map(AppUser::getNome)
+                .orElse(null);
     }
 
     private boolean hasAdminRole(AppUser user) {

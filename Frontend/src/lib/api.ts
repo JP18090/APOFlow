@@ -201,6 +201,8 @@ export interface UserProfile {
   fotoUrl: string | null;
   periodo: string | null;
   drt: string | null;
+  orientadorId: string | null;
+  orientadorNome: string | null;
 }
 
 export function getProfile() {
@@ -221,16 +223,18 @@ export interface AdminUser {
   papel: Role;
   papeis: Role[];
   drt: string | null;
+  orientadorId: string | null;
+  orientadorNome: string | null;
 }
 
 export function getUsers() {
   return request<AdminUser[]>('/users');
 }
 
-export function updateUserRoles(userId: string, papeis: Role[]) {
+export function updateUserRoles(userId: string, papeis: Role[], orientadorId?: string | null) {
   return request<AdminUser>(`/users/${encodeURIComponent(userId)}/roles`, {
     method: 'PUT',
-    body: JSON.stringify({ papeis }),
+    body: JSON.stringify({ papeis, orientadorId }),
   });
 }
 

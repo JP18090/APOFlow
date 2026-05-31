@@ -80,9 +80,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       switchProfessorRole: (role) => {
         if (!user) return;
-        const allowedRoles = user.papeis.filter((entry) => ['orientador', 'comissao', 'coordenacao'].includes(entry));
+        const allowedRoles = user.papeis.filter((entry) => ['orientador', 'coordenacao'].includes(entry));
         if (allowedRoles.length < 2) return;
-        if (!['orientador', 'comissao', 'coordenacao'].includes(role)) return;
+        if (!['orientador', 'coordenacao'].includes(role)) return;
         if (!allowedRoles.includes(role)) return;
         setUser({ ...user, papel: role });
       },

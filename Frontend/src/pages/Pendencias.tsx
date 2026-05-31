@@ -12,7 +12,7 @@ export default function Pendencias() {
 
   return (
     <AppLayout>
-      <OrientadorDashboard />
+      <OrientadorDashboard compact />
     </AppLayout>
   );
 }

@@ -97,6 +97,12 @@ export default function PerfilPage() {
             <p className="font-display font-semibold text-foreground">{profile.nome}</p>
             <p className="font-body text-sm text-muted-foreground">{profile.email}</p>
             <p className="font-body text-xs text-primary capitalize">{profile.papel}</p>
+            {profile.papeis.includes('aluno') && (
+              <p className="mt-1 font-body text-xs text-foreground">
+                <span className="text-primary">Orientador: </span>
+                {profile.orientadorNome ?? 'Não definido'}
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>

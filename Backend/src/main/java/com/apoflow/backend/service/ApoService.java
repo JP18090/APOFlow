@@ -10,10 +10,13 @@ import com.apoflow.backend.domain.Apo;
 import com.apoflow.backend.domain.ApoAttachment;
 import com.apoflow.backend.domain.ApoStatus;
 import com.apoflow.backend.domain.ApoVote;
+import com.apoflow.backend.domain.AppUser;
 import com.apoflow.backend.domain.CoordenacaoEntrada;
+import com.apoflow.backend.domain.Role;
 import com.apoflow.backend.domain.Student;
 import com.apoflow.backend.domain.VoteDecision;
 import com.apoflow.backend.repository.ApoRepository;
+import com.apoflow.backend.repository.AppUserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,11 +33,13 @@ public class ApoService {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final ApoRepository apoRepository;
+    private final AppUserRepository userRepository;
     private final StudentService studentService;
     private final NotificationService notificationService;
 
-    public ApoService(ApoRepository apoRepository, StudentService studentService, NotificationService notificationService) {
+    public ApoService(ApoRepository apoRepository, AppUserRepository userRepository, StudentService studentService, NotificationService notificationService) {
         this.apoRepository = apoRepository;
+        this.userRepository = userRepository;
         this.studentService = studentService;
         this.notificationService = notificationService;
     }
@@ -44,6 +49,33 @@ public class ApoService {
                 .sorted(Comparator.comparing(Apo::getDataAtualizacao).reversed())
                 .map(this::map)
                 .toList();
+    }
+
+    public List<ApoResponse> findVisibleFor(String email) {
+        AppUser user = getUserByEmail(email);
+        List<Role> roles = effectiveRoles(user);
+
+        if (roles.contains(Role.ADMIN) || roles.contains(Role.COMISSAO) || roles.contains(Role.COORDENACAO) || roles.contains(Role.SECRETARIA)) {
+            return findAll();
+        }
+
+        String userId = user.getId();
+        if (roles.contains(Role.ORIENTADOR)) {
+            return apoRepository.findAll().stream()
+                    .filter(apo -> userId != null && userId.equals(apo.getOrientadorId()))
+                    .sorted(Comparator.comparing(Apo::getDataAtualizacao).reversed())
+                    .map(this::map)
+                    .toList();
+        }
+
+        if (roles.contains(Role.ALUNO)) {
+            return apoRepository.findByAlunoId(userId).stream()
+                    .sorted(Comparator.comparing(Apo::getDataAtualizacao).reversed())
+                    .map(this::map)
+                    .toList();
+        }
+
+        return List.of();
     }
 
     @Transactional
@@ -69,7 +101,7 @@ public class ApoService {
                 "Nova submissao de " + student.getNome() + " aguardando avaliacao do orientador",
                 "Agora mesmo",
                 false,
-                "orientador"
+                orientadorRecipient(student)
         );
         return map(saved);
     }
@@ -122,7 +154,7 @@ public class ApoService {
                 "APO reenviada por " + apo.getAluno() + " aguardando avaliacao do orientador",
                 "Agora mesmo",
                 false,
-                "orientador"
+                orientadorRecipient(apo)
         );
 
         return map(apoRepository.save(apo));
@@ -137,13 +169,14 @@ public class ApoService {
 
         apo.setStatus(ApoStatus.DESISTIDA);
         apo.setDataAtualizacao(LocalDate.now());
-        notificationService.create(id("noti"), "O aluno desistiu da APO \"" + apo.getTitulo() + "\"", "Agora mesmo", false, "orientador");
+        notificationService.create(id("noti"), "O aluno desistiu da APO \"" + apo.getTitulo() + "\"", "Agora mesmo", false, orientadorRecipient(apo));
         return map(apoRepository.save(apo));
     }
 
     @Transactional
-    public ApoResponse approveByOrientador(String apoId) {
+    public ApoResponse approveByOrientador(String apoId, String orientadorEmail) {
         Apo apo = getEntity(apoId);
+        validateAssignedOrientador(apo, orientadorEmail);
         apo.setStatus(ApoStatus.EM_AVALIACAO_COMISSAO);
         apo.setDataAtualizacao(LocalDate.now());
         notificationService.create(id("noti"), "APO \"" + apo.getTitulo() + "\" enviada para a comissao", "Agora mesmo", false, "comissao");
@@ -151,8 +184,9 @@ public class ApoService {
     }
 
     @Transactional
-    public ApoResponse returnByOrientador(String apoId, DecisionRequest request) {
+    public ApoResponse returnByOrientador(String apoId, DecisionRequest request, String orientadorEmail) {
         Apo apo = getEntity(apoId);
+        validateAssignedOrientador(apo, orientadorEmail);
         apo.setStatus(ApoStatus.DEVOLVIDA);
         apo.setDataAtualizacao(LocalDate.now());
         notificationService.create(id("noti"), "Sua APO \"" + apo.getTitulo() + "\" foi devolvida pelo orientador: " + request.justificativa(), "Agora mesmo", false, "aluno");
@@ -261,6 +295,36 @@ public class ApoService {
 
     private String id(String prefix) {
         return prefix + "-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private void validateAssignedOrientador(Apo apo, String orientadorEmail) {
+        AppUser orientador = getUserByEmail(orientadorEmail);
+        if (orientador.getId() == null || !orientador.getId().equals(apo.getOrientadorId())) {
+            throw new IllegalArgumentException("Esta APO não está vinculada ao orientador autenticado.");
+        }
+    }
+
+    private AppUser getUserByEmail(String email) {
+        return userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
+    }
+
+    private List<Role> effectiveRoles(AppUser user) {
+        return (user.getPapeis() != null && !user.getPapeis().isEmpty())
+                ? user.getPapeis()
+                : List.of(user.getPapel());
+    }
+
+    private String orientadorRecipient(Student student) {
+        return student.getOrientadorId() == null || student.getOrientadorId().isBlank()
+                ? "orientador"
+                : student.getOrientadorId();
+    }
+
+    private String orientadorRecipient(Apo apo) {
+        return apo.getOrientadorId() == null || apo.getOrientadorId().isBlank()
+                ? "orientador"
+                : apo.getOrientadorId();
     }
 
     private void applyRequestData(Apo apo, CreateApoRequest request) {
