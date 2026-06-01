@@ -8,8 +8,10 @@ import com.apoflow.backend.repository.AppNotificationRepository;
 import com.apoflow.backend.repository.AppUserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class NotificationService {
@@ -27,18 +29,28 @@ public class NotificationService {
     }
 
     public List<NotificationResponse> findByRecipient(String recipient) {
-        return notificationRepository.findByDestinatarioIn(List.of(recipient, "all")).stream()
+        migrateLegacyRoleNotifications(recipient);
+        return notificationRepository.findByDestinatarioIn(List.of(recipient)).stream()
                 .map(this::map)
                 .toList();
     }
 
     public void create(String id, String title, String time, boolean read, String recipient) {
-        notificationRepository.save(new AppNotification(id, title, time, read, recipient));
-        sendEmailToRecipient(recipient, title);
+        List<AppUser> targetUsers = resolveTargetUsers(recipient);
+        if (targetUsers.isEmpty()) {
+            notificationRepository.save(new AppNotification(id, title, time, read, recipient));
+            sendEmailToRecipient(recipient, title);
+            return;
+        }
+
+        targetUsers.forEach(user -> {
+            notificationRepository.save(new AppNotification(notificationId(id, user.getId()), title, time, read, user.getId()));
+            emailService.sendApoNotification(user.getEmail(), user.getNome(), title, title);
+        });
     }
 
     public void markAllAsRead(String recipient) {
-        notificationRepository.findByDestinatarioIn(List.of(recipient, "all")).stream()
+        notificationRepository.findByDestinatarioIn(List.of(recipient)).stream()
                 .filter(notification -> !notification.isLida())
                 .forEach(notification -> {
                     notification.setLida(true);
@@ -57,6 +69,66 @@ public class NotificationService {
             userOpt.ifPresent(user ->
                     emailService.sendApoNotification(user.getEmail(), user.getNome(), title, title));
         }
+    }
+
+    private List<AppUser> resolveTargetUsers(String recipient) {
+        if ("all".equalsIgnoreCase(recipient)) {
+            return userRepository.findAll();
+        }
+
+        try {
+            Role role = Role.valueOf(recipient.toUpperCase());
+            return userRepository.findAll().stream()
+                    .filter(user -> hasRole(user, role))
+                    .toList();
+        } catch (IllegalArgumentException ignored) {
+            return userRepository.findById(recipient)
+                    .map(user -> List.of(user))
+                    .orElseGet(List::of);
+        }
+    }
+
+    private boolean hasRole(AppUser user, Role role) {
+        if (user.getPapeis() != null && user.getPapeis().contains(role)) {
+            return true;
+        }
+        return user.getPapel() == role;
+    }
+
+    private String notificationId(String baseId, String userId) {
+        if (baseId == null || baseId.isBlank()) {
+            return "noti-" + UUID.randomUUID().toString().substring(0, 8) + "-" + userId;
+        }
+        return baseId + "-" + userId;
+    }
+
+    private void migrateLegacyRoleNotifications(String recipient) {
+        userRepository.findById(recipient).ifPresent(user -> {
+            List<String> legacyRecipients = new ArrayList<>();
+            legacyRecipients.add("all");
+            effectiveRoles(user).forEach(role -> legacyRecipients.add(role.name().toLowerCase()));
+
+            notificationRepository.findByDestinatarioIn(legacyRecipients).forEach(notification -> {
+                String copyId = notificationId(notification.getId(), user.getId());
+                if (notificationRepository.existsById(copyId)) {
+                    return;
+                }
+
+                notificationRepository.save(new AppNotification(
+                        copyId,
+                        notification.getTitulo(),
+                        notification.getTempo(),
+                        notification.isLida(),
+                        user.getId()
+                ));
+            });
+        });
+    }
+
+    private List<Role> effectiveRoles(AppUser user) {
+        return (user.getPapeis() != null && !user.getPapeis().isEmpty())
+                ? user.getPapeis()
+                : List.of(user.getPapel());
     }
 
     private NotificationResponse map(AppNotification notification) {

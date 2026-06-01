@@ -54,8 +54,7 @@ export default function NovaAPO() {
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.apos }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.notifications('aluno') }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.notifications('orientador') }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.notifications(user?.id ?? '') }),
       ]);
       toast.success('APO submetida com sucesso!', { description: 'Seu orientador recebera uma notificacao.' });
       navigate('/minhas-apos');
@@ -82,8 +81,7 @@ export default function NovaAPO() {
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.apos }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.notifications('aluno') }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.notifications('orientador') }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.notifications(user?.id ?? '') }),
       ]);
       toast.success('APO editada e reenviada com sucesso.');
       navigate('/minhas-apos');

@@ -6,14 +6,13 @@ import { MackenzieLogo } from '@/components/MackenzieLogo';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
 import { getNotifications, markNotificationsAsRead, queryKeys } from '@/lib/api';
-import { getNotificationRecipient } from '@/lib/mock-data';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const recipient = user ? (user.papel === 'orientador' ? user.id : getNotificationRecipient(user.papel)) : 'aluno';
+  const recipient = user?.id ?? '';
   const queryClient = useQueryClient();
   const { data: notifications = [] } = useQuery({
     queryKey: queryKeys.notifications(recipient),

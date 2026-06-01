@@ -159,12 +159,12 @@ public class DataInitializer {
             ));
 
             notificationRepository.saveAll(List.of(
-                    new AppNotification("noti-1", "APO \"Artigo IEEE\" recebeu nova avaliacao", "2 horas atras", false, "aluno"),
-                    new AppNotification("noti-2", "Sua APO \"Estagio Docencia\" foi aprovada pelo orientador", "1 dia atras", false, "aluno"),
-                    new AppNotification("noti-3", "Nova submissao de Jose Pedro Bitetti aguardando avaliacao", "2 dias atras", true, "orientador"),
-                    new AppNotification("noti-4", "Lembrete: 3 APOs pendentes de votacao na comissao", "3 dias atras", true, "comissao"),
-                    new AppNotification("noti-5", "APO \"Capitulo Springer\" aprovada pela coordenacao", "1 semana atras", true, "coordenacao"),
-                    new AppNotification("noti-6", "Pacote de arquivamento pronto para revisao", "1 dia atras", false, "secretaria")
+                    new AppNotification("noti-1", "APO \"Artigo IEEE\" recebeu nova avaliacao", "2 horas atras", false, "aluno-1"),
+                    new AppNotification("noti-2", "Sua APO \"Estagio Docencia\" foi aprovada pelo orientador", "1 dia atras", false, "aluno-1"),
+                    new AppNotification("noti-3", "Nova submissao de Jose Pedro Bitetti aguardando avaliacao", "2 dias atras", true, "orientador-1"),
+                    new AppNotification("noti-4", "Lembrete: 3 APOs pendentes de votacao na comissao", "3 dias atras", true, "comissao-1"),
+                    new AppNotification("noti-5", "APO \"Capitulo Springer\" aprovada pela coordenacao", "1 semana atras", true, "coordenacao-1"),
+                    new AppNotification("noti-6", "Pacote de arquivamento pronto para revisao", "1 dia atras", false, "secretaria-1")
             ));
         };
     }

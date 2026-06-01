@@ -4,11 +4,10 @@ import { Bell, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { getNotifications, queryKeys } from '@/lib/api';
-import { getNotificationRecipient } from '@/lib/mock-data';
 
 export default function Notificacoes() {
   const { user } = useAuth();
-  const recipient = user ? getNotificationRecipient(user.papel) : 'aluno';
+  const recipient = user?.id ?? '';
   const { data: notifications = [] } = useQuery({
     queryKey: queryKeys.notifications(recipient),
     queryFn: () => getNotifications(recipient),

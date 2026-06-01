@@ -91,10 +91,6 @@ export interface NotificationItem {
   lida: boolean;
 }
 
-export function getNotificationRecipient(role: Role) {
-  return role;
-}
-
 export function getStatusLabel(status: APOStatus) {
   const labels: Record<APOStatus, string> = {
     rascunho: 'Rascunho',

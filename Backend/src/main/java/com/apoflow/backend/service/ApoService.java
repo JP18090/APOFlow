@@ -189,7 +189,7 @@ public class ApoService {
         validateAssignedOrientador(apo, orientadorEmail);
         apo.setStatus(ApoStatus.DEVOLVIDA);
         apo.setDataAtualizacao(LocalDate.now());
-        notificationService.create(id("noti"), "Sua APO \"" + apo.getTitulo() + "\" foi devolvida pelo orientador: " + request.justificativa(), "Agora mesmo", false, "aluno");
+        notificationService.create(id("noti"), "Sua APO \"" + apo.getTitulo() + "\" foi devolvida pelo orientador: " + request.justificativa(), "Agora mesmo", false, apo.getAlunoId());
         return map(apoRepository.save(apo));
     }
 
@@ -243,7 +243,7 @@ public class ApoService {
             default -> throw new IllegalArgumentException("Decisao de coordenacao invalida.");
         }
 
-        notificationService.create(id("noti"), "Atualizacao na APO \"" + apo.getTitulo() + "\": " + request.justificativa(), "Agora mesmo", false, "aluno");
+        notificationService.create(id("noti"), "Atualizacao na APO \"" + apo.getTitulo() + "\": " + request.justificativa(), "Agora mesmo", false, apo.getAlunoId());
         return map(apoRepository.save(apo));
     }
 
@@ -264,7 +264,7 @@ public class ApoService {
         }
         apo.setStatus(ApoStatus.LANCADO);
         apo.setDataAtualizacao(LocalDate.now());
-        notificationService.create(id("noti"), "Credito da APO \"" + apo.getTitulo() + "\" lancado no sistema academico", "Agora mesmo", false, "aluno");
+        notificationService.create(id("noti"), "Credito da APO \"" + apo.getTitulo() + "\" lancado no sistema academico", "Agora mesmo", false, apo.getAlunoId());
         return map(apoRepository.save(apo));
     }
 
